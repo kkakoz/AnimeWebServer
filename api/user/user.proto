@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package pet.service.v1;
+option go_package = "./;userpb";
+
+//import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+//import "google/protobuf/timestamp.proto";
+
+service UserService {
+  rpc Login (LoginInfo) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/user/login"
+      body: "*"
+    };
+  };
+
+  rpc UserInfo (Id) returns (LoginResponse) {
+    option (google.api.http) = {
+      get: "/v1/user/{id}"
+    };
+  };
+}
+
+message LoginInfo {
+  string phone = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+}
+
+message UserInfo {
+  int64 id = 1;
+  string name = 2;
+  string phone = 3;
+}
+
+message UserInfoList{
+  repeated UserInfo userinfoList = 1;
+}
+
+message Id {
+  string id = 1;
+}
