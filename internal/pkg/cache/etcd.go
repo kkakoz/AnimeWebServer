@@ -4,15 +4,26 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+	"time"
 )
 
+type EtcdOptions struct {
+	Endpoints []string `json:"endpoints"`
+}
+
 func NewEtcd(viper *viper.Viper) (*clientv3.Client, error) {
-	config := &clientv3.Config{}
-	err := viper.UnmarshalKey("etcd", config)
+	options := &EtcdOptions{}
+	err := viper.UnmarshalKey("etcd", options)
 	if err != nil {
 		return nil, err
 	}
-	client, err := clientv3.New(*config)
+	config := clientv3.Config{
+		Endpoints: options.Endpoints,
+		DialTimeout: 5 * time.Second,
+		DialOptions: []grpc.DialOption{grpc.WithBlock()},
+	}
+	client, err := clientv3.New(config)
 	if err != nil {
 		return nil, err
 	}

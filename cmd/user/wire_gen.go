@@ -34,6 +34,9 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	appApp := app.NewApp(viper, logger, grpcServer)
+	appApp, err := app.NewApp(viper, logger, grpcServer)
+	if err != nil {
+		return nil, err
+	}
 	return appApp, nil
 }

@@ -26,10 +26,16 @@ func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr
 		key: "/" + schema + "/" + serName + "/" + addr,
 		val: addr,
 	}
+	log.Println("key = ", s.key)
 	err := s.putKeyWithLease(lease)
 	if err != nil {
 		return nil, err
 	}
+	go func() {
+		for v := range s.keepAliveChan {
+			log.Println("keepalive v = ", v)
+		}
+	}()
 	return s, nil
 }
 
@@ -48,7 +54,6 @@ func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 		return err
 	}
 	s.keepAliveChan = resChan
-	log.Println("put key:%s val")
 	return nil
 }
 

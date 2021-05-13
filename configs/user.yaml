@@ -1,7 +1,7 @@
 app:
-  name: user-grpcserv
+  name: user-serv
   host: 127.0.0.1
-  port: 9001
+  port: 10010
 db:
   user: root
   password: 123
@@ -17,4 +17,4 @@ log:
   stdout: true
 etcd:
   endpoints:
-    -"43.128.25.218:2379"
+    43.128.25.218:2379

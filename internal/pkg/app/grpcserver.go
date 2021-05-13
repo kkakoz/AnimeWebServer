@@ -15,7 +15,7 @@ type GrpcServer struct {
 	grpcServer *grpc.Server
 }
 
-type RegisterService func (server *grpc.Server)
+type RegisterService func(server *grpc.Server)
 
 func NewGrpcServer(ctx context.Context, viper *viper.Viper, client *clientv3.Client, register RegisterService) (*GrpcServer, error) {
 	g := &GrpcServer{}
@@ -31,11 +31,7 @@ func NewGrpcServer(ctx context.Context, viper *viper.Viper, client *clientv3.Cli
 }
 
 func (s *GrpcServer) run(servname, host, port string) error {
-	listen, err := net.Listen("tcp", port)
-	if err != nil {
-		return err
-	}
-	err = s.grpcServer.Serve(listen)
+	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return err
 	}

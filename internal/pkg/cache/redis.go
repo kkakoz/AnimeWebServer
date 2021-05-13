@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Options struct {
+type RedisOptions struct {
 	Host string
 	Port string
 	Password string
@@ -17,11 +17,13 @@ type Options struct {
 var Redis *redis.Client
 
 func NewRedis(viper *viper.Viper) error {
-	options := &redis.Options{}
-	err := viper.UnmarshalKey("redis", options)
+	o := &RedisOptions{}
+	err := viper.UnmarshalKey("redis", o)
 	if err != nil {
 		return err
 	}
+	options := &redis.Options{}
+
 	redis.NewClient(options)
 
 	//Redis = redis.NewClient(&redis.Options{

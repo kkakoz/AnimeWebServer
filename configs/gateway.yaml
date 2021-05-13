@@ -1,3 +1,7 @@
+gateway:
+  port: 10011
+
 etcd:
-  Endpoints:
-    -"43.128.25.218:2379"
+  endpoints:
+    43.128.25.218:2379
+  dial-timeout: 1

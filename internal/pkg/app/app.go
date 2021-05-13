@@ -14,8 +14,14 @@ type App struct {
 	grpcServer *GrpcServer
 }
 
-func NewApp(viper *viper.Viper, logger *zap.Logger, grpcServer *GrpcServer) *App {
-	return &App{Name: viper.Sub("app").GetString("name"), logger: logger, grpcServer: grpcServer}
+func NewApp(viper *viper.Viper, logger *zap.Logger, grpcServer *GrpcServer) (*App, error) {
+	app := &App{}
+	err := viper.UnmarshalKey("app", app)
+	if err != nil {
+		return nil, err
+	}
+	app.grpcServer = grpcServer
+	return app, nil
 }
 
 func (a *App) Start() error {
