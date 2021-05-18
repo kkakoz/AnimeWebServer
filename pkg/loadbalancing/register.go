@@ -13,33 +13,37 @@ const (
 )
 
 type ServiceRegister struct {
-	ctx           context.Context
-	cli           *clientv3.Client
-	leaseId       clientv3.LeaseID
-	keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse
-	key           string
-	val           string
+	ctx       context.Context
+	cli       *clientv3.Client
+	leaseId   clientv3.LeaseID
+	retry     chan struct{} // 因为网络问题断开后的重试次数
+	retryTime int64         // 重试间隔时间
+	key       string
+	val       string
+	//keepAliveChan <-chan *clientv3.LeaseKeepAliveResponse
 }
 
 const leaseTime int64 = 20
 
 func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr string) (*ServiceRegister, error) {
 	s := &ServiceRegister{
-		ctx: ctx,
-		cli: cli,
-		key: "/" + schema + "/" + serName + "/" + addr,
-		val: addr,
+		ctx:       ctx,
+		cli:       cli,
+		retryTime: 20,
+		retry: make(chan struct{}),
+		key:       "/" + schema + "/" + serName + "/" + addr,
+		val:       addr,
 	}
-	log.Println("key = ", s.key)
-	err := s.putKeyWithLease(leaseTime)
+	err := s.putKeyWithLease() // 第一次服务注册
 	if err != nil {
 		return nil, err
 	}
+	go s.RegisterAndKeeplive() // 服务注册
 	return s, nil
 }
 
-func (s *ServiceRegister) putKeyWithLease(lease int64) error {
-	res, err := s.cli.Grant(s.ctx, lease)
+func (s *ServiceRegister) putKeyWithLease() error {
+	res, err := s.cli.Grant(s.ctx, leaseTime)
 	if err != nil {
 		return err
 	}
@@ -52,14 +56,13 @@ func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 	if err != nil {
 		return err
 	}
-	s.keepAliveChan = resChan
+	//s.keepAliveChan = resChan
 	go func() {
-		i := 0
-		for range s.keepAliveChan {
-			i++
-			fmt.Println("kepp alive time = ", time.Now(), " i = ", i)
+		for range resChan {
+			fmt.Println("kepp alive time = ", time.Now())
 		}
-		fmt.Println("for loop is intercepter")
+		// keepalive关闭
+		s.retry <- struct{}{}
 	}()
 	return nil
 }
@@ -70,4 +73,18 @@ func (s *ServiceRegister) Close() error {
 		return err
 	}
 	return nil
+}
+
+func (s *ServiceRegister) RegisterAndKeeplive() {
+	select {
+	case <-s.ctx.Done():
+		return
+	case <-s.retry:
+		time.Sleep(time.Duration(s.retryTime) * time.Second)
+		err := s.putKeyWithLease() // 重新进行服务注册
+		if err != nil {
+			log.Println("注册服务失败,err:", err.Error())
+			s.retry <- struct{}{}
+		}
+	}
 }
