@@ -7,11 +7,13 @@ package main
 
 import (
 	"context"
+	"red-bean-anime-server/internal/app/user/repo"
 	"red-bean-anime-server/internal/app/user/service"
-	"red-bean-anime-server/internal/pkg/app"
-	"red-bean-anime-server/internal/pkg/cache"
-	"red-bean-anime-server/internal/pkg/config"
-	"red-bean-anime-server/internal/pkg/log"
+	"red-bean-anime-server/internal/app/user/usecase"
+	"red-bean-anime-server/pkg/app"
+	"red-bean-anime-server/pkg/cache"
+	"red-bean-anime-server/pkg/config"
+	"red-bean-anime-server/pkg/log"
 )
 
 // Injectors from wire.go:
@@ -29,7 +31,13 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	registerService := service.NewUserService()
+	redisClient, err := cache.NewRedis(viper)
+	if err != nil {
+		return nil, err
+	}
+	userRepo := repo.NewUserRepo(redisClient)
+	userUsecase := usecase.NewUserUsecase(userRepo)
+	registerService := service.NewUserService(userUsecase)
 	grpcServer, err := app.NewGrpcServer(ctx, viper, client, registerService)
 	if err != nil {
 		return nil, err

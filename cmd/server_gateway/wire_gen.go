@@ -8,8 +8,8 @@ package main
 import (
 	"context"
 	"red-bean-anime-server/internal/app/gateway"
-	"red-bean-anime-server/internal/pkg/cache"
-	"red-bean-anime-server/internal/pkg/config"
+	"red-bean-anime-server/pkg/cache"
+	"red-bean-anime-server/pkg/config"
 )
 
 // Injectors from wire.go:

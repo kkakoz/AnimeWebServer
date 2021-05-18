@@ -3,13 +3,20 @@ package usecase
 import (
 	"red-bean-anime-server/internal/app/user/domain"
 	"context"
+	"red-bean-anime-server/internal/app/user/repo"
 )
 
 type UserUsecase struct {
-
+	userRepo *repo.UserRepo
 }
 
-func (u *UserUsecase) Login(ctx context.Context, phone string) (domain.UserInfo, error) {
+func NewUserUsecase(userRepo *repo.UserRepo) *UserUsecase {
+	return &UserUsecase{userRepo: userRepo}
+}
+
+func (u *UserUsecase) Login(ctx context.Context, phone, password string) (domain.UserInfo, error) {
+
+	//u.userRepo.GetUserInfo()
 	panic("implement me")
 }
 

@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-package pet.service.v1;
 option go_package = "./;userpb";
 
 //import "google/protobuf/empty.proto";
@@ -10,14 +9,21 @@ import "google/api/annotations.proto";
 service UserService {
   rpc Login (LoginInfo) returns (LoginResponse) {
     option (google.api.http) = {
-      post: "/v1/user/login"
+      post: "/user/login"
+      body: "*"
+    };
+  };
+
+  rpc Register (LoginInfo) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/user/register"
       body: "*"
     };
   };
 
   rpc UserInfo (Id) returns (LoginResponse) {
     option (google.api.http) = {
-      get: "/v1/user/{id}"
+      get: "/user/{id}"
     };
   };
 }

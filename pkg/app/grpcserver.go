@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"net"
-	"red-bean-anime-server/internal/pkg/loadbalancing"
+	"red-bean-anime-server/pkg/loadbalancing"
 )
 
 type GrpcServer struct {
@@ -19,7 +19,9 @@ type RegisterService func(server *grpc.Server)
 
 func NewGrpcServer(ctx context.Context, viper *viper.Viper, client *clientv3.Client, register RegisterService) (*GrpcServer, error) {
 	g := &GrpcServer{}
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		//grpc.UnaryInterceptor(gormx.ServerErrorInterceptor),
+	)
 	if err := viper.UnmarshalKey("grpc-server", g); err != nil {
 		return nil, err
 	}
@@ -35,11 +37,10 @@ func (s *GrpcServer) run(servname, host, port string) error {
 	if err != nil {
 		return err
 	}
-	register, err := loadbalancing.NewServiceRegister(s.ctx, s.etcdCli, servname, host+":"+port, 5)
+	_, err = loadbalancing.NewServiceRegister(s.ctx, s.etcdCli, servname, host+":"+port)
 	if err != nil {
 		return err
 	}
-	defer register.Close()
 	err = s.grpcServer.Serve(listen)
 	if err != nil {
 		return err

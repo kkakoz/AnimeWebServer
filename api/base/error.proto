@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "./;basepb";
+
+import "google/protobuf/any.proto";
+
+message Error {
+  int32 code = 1;
+  string message = 2;
+  repeated google.protobuf.Any details = 3;
+}
+
+enum ErrorCode {
+  EC_SUCCESS = 0;
+  EC_SERVER_UNKNOWN = 1001; // 服务器未知错误
+  EC_UNAUTHORIZED = 1002; // 未登录或者需要重新登录
+}

@@ -15,9 +15,9 @@ type UserInfo struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
 	Phone     string `json:"phone"`
+	Token     string `json:"token"`
 	CreatedAt string
 	UpdatedAt string
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 type IUserUsecase interface {

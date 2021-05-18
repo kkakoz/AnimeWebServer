@@ -2,8 +2,10 @@ package loadbalancing
 
 import (
 	"context"
+	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	"log"
+	"time"
 )
 
 const (
@@ -19,7 +21,9 @@ type ServiceRegister struct {
 	val           string
 }
 
-func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr string, lease int64) (*ServiceRegister, error) {
+const leaseTime int64 = 20
+
+func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr string) (*ServiceRegister, error) {
 	s := &ServiceRegister{
 		ctx: ctx,
 		cli: cli,
@@ -27,15 +31,10 @@ func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr
 		val: addr,
 	}
 	log.Println("key = ", s.key)
-	err := s.putKeyWithLease(lease)
+	err := s.putKeyWithLease(leaseTime)
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		for v := range s.keepAliveChan {
-			log.Println("keepalive v = ", v)
-		}
-	}()
 	return s, nil
 }
 
@@ -54,10 +53,19 @@ func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 		return err
 	}
 	s.keepAliveChan = resChan
+	go func() {
+		i := 0
+		for range s.keepAliveChan {
+			i++
+			fmt.Println("kepp alive time = ", time.Now(), " i = ", i)
+		}
+		fmt.Println("for loop is intercepter")
+	}()
 	return nil
 }
 
 func (s *ServiceRegister) Close() error {
+	log.Println("invoke close")
 	if _, err := s.cli.Revoke(s.ctx, s.leaseId); err != nil {
 		return err
 	}

@@ -1,5 +1,12 @@
 GOPATH:=$(shell go env GOPATH)
 
+
+.PHONY: baseProto
+baseProto:
+		protoc -I. -I$(GOPATH)/include \
+			--go_out=plugins=grpc:./api/base/ \
+			 ./api/base/*.proto
+
 .PHONY: videoProto
 videoProto:
 		protoc -I. -I$(GOPATH)/include \

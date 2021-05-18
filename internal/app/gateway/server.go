@@ -5,7 +5,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	userpb "red-bean-anime-server/api/user"
-	"red-bean-anime-server/internal/pkg/client"
+	"red-bean-anime-server/pkg/client"
 )
 
 func Register(ctx context.Context, s *runtime.ServeMux, etcdCli *clientv3.Client) error {
