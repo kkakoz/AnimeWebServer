@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/resolver"
 	userpb "red-bean-anime-server/api/user"
+	"red-bean-anime-server/pkg/grpcx"
 	"red-bean-anime-server/pkg/loadbalancing"
 )
 
@@ -22,6 +23,7 @@ func NewUserClient(ctx context.Context, etcdClient *clientv3.Client) (userpb.Use
 	conn, err := grpc.Dial(
 		r.Scheme()+":///"+loadbalancing.UserServName,
 		grpc.WithBalancerName("round_robin"), grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(grpcx.NewClientErrInterceptor(loadbalancing.UserServName)),
 	)
 	if err != nil {
 		return nil, err

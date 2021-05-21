@@ -2,16 +2,13 @@ syntax = "proto3";
 
 option go_package = "./;basepb";
 
-import "google/protobuf/any.proto";
-
-message Error {
-  int32 code = 1;
-  string message = 2;
-  repeated google.protobuf.Any details = 3;
-}
+//import "google/protobuf/any.proto";
 
 enum ErrorCode {
-  EC_SUCCESS = 0;
-  EC_SERVER_UNKNOWN = 1001; // 服务器未知错误
-  EC_UNAUTHORIZED = 1002; // 未登录或者需要重新登录
+  EC_UNUSE = 0;
+  EC_SUCCESS = 200; // 成功返回code
+  EC_BUSINESSERR = 400;  // 业务错误
+  EC_UNAUTHORIZED = 402; // 未登录或者需要重新登录
+  EC_SERVER_UNKNOWN = 500; // 服务器未知错误
+
 }

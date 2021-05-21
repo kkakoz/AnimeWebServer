@@ -2,12 +2,14 @@ package mysqlx
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"github.com/google/wire"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
-	"reflect"
+	"red-bean-anime-server/pkg/gerrors"
 )
 
 var db *gorm.DB
@@ -21,12 +23,15 @@ type Options struct {
 }
 
 func New(viper *viper.Viper) (*gorm.DB, error) {
-	var (
-		err error
-		o   = new(Options)
-	)
-	if err = viper.UnmarshalKey("db", o); err != nil {
-		return nil, err
+	viper.SetDefault("db.user", "root")
+	viper.SetDefault("db.password", "")
+	viper.SetDefault("db.host", "127.0.0.1")
+	viper.SetDefault("db.port", 3306)
+	viper.SetDefault("db.name", "test")
+	o := &Options{}
+	var err error
+	if err := viper.UnmarshalKey("db", o); err != nil {
+		return nil, errors.Wrap(err, "viper unmarshal失败")
 	}
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?"+
 		"charset=utf8mb4&parseTime=True&loc=Local",
@@ -34,10 +39,7 @@ func New(viper *viper.Viper) (*gorm.DB, error) {
 		o.Host, o.Port,
 		o.Name)
 	db, err = gorm.Open(mysql.Open(dns), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	return db, nil
+	return db, errors.Wrap(err, "打开mysql连接失败")
 }
 
 // 可以看 https://github.com/win5do/go-microservice-demo/blob/main/docs/sections/gorm.md
@@ -59,19 +61,24 @@ func Transaction(ctx context.Context, fc func(txctx context.Context) error) erro
 	})
 }
 
-// 如果使用跨模型事务则传参
-func GetDB(ctx context.Context) *gorm.DB {
+func Begin(ctx context.Context, databaase *gorm.DB, opts ...*sql.TxOptions) (context.Context, *gorm.DB) {
+	tx := databaase.Begin(opts...)
+	return context.WithValue(ctx, ctxTransactionKey{}, tx), tx
+}
+
+func GetDB(ctx context.Context) (*gorm.DB, error) {
 	iface := ctx.Value(ctxTransactionKey{})
 
 	if iface != nil {
 		tx, ok := iface.(*gorm.DB)
 		if !ok {
-			log.Panicf("unexpect context value type: %s", reflect.TypeOf(tx))
-			return nil
+			return nil, gerrors.ErrServerUnknown
 		}
 
-		return tx
+		return tx, nil
 	}
 
-	return db.WithContext(ctx)
+	return db.WithContext(ctx), nil
 }
+
+var ProviderSet = wire.NewSet(New)

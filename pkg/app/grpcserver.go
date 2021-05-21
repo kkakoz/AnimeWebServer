@@ -3,9 +3,12 @@ package app
 import (
 	"context"
 	"github.com/coreos/etcd/clientv3"
-	"github.com/spf13/viper"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_prometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 	"net"
+	"red-bean-anime-server/pkg/grpcx"
 	"red-bean-anime-server/pkg/loadbalancing"
 )
 
@@ -17,19 +20,20 @@ type GrpcServer struct {
 
 type RegisterService func(server *grpc.Server)
 
-func NewGrpcServer(ctx context.Context, viper *viper.Viper, client *clientv3.Client, register RegisterService) (*GrpcServer, error) {
+func NewGrpcServer(ctx context.Context, client *clientv3.Client, register RegisterService) (*GrpcServer) {
 	g := &GrpcServer{}
 	server := grpc.NewServer(
-		//grpc.UnaryInterceptor(gormx.ServerErrorInterceptor),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_prometheus.UnaryServerInterceptor,
+			grpcx.ServerErrorInterceptor,
+			grpc_recovery.UnaryServerInterceptor(grpcx.RecoveryInterceptor()),
+		)),
 	)
-	if err := viper.UnmarshalKey("grpc-server", g); err != nil {
-		return nil, err
-	}
 	register(server)
 	g.grpcServer = server
 	g.etcdCli = client
 	g.ctx = ctx
-	return g, nil
+	return g
 }
 
 func (s *GrpcServer) run(servname, host, port string) error {

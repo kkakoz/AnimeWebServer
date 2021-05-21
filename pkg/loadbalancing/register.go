@@ -16,7 +16,7 @@ type ServiceRegister struct {
 	ctx       context.Context
 	cli       *clientv3.Client
 	leaseId   clientv3.LeaseID
-	retry     chan struct{} // 因为网络问题断开后的重试次数
+	retry     chan struct{} // 因为网络问题断开后的重试channel
 	retryTime int64         // 重试间隔时间
 	key       string
 	val       string
@@ -38,7 +38,7 @@ func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr
 	if err != nil {
 		return nil, err
 	}
-	go s.RegisterAndKeeplive() // 服务注册
+	go s.RegisterAndKeeplive() // 服务注册重试
 	return s, nil
 }
 

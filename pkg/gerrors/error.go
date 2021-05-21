@@ -6,9 +6,6 @@ import (
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"red-bean-anime-server/pkg/strx"
-	"runtime"
-	"strings"
 )
 
 const TypeUrlStack = "type_url_stack"
@@ -17,61 +14,60 @@ func WrapError(err error) error {
 	if err == nil {
 		return nil
 	}
-
-	s := &spb.Status{
+	statusErr, ok := status.FromError(err)
+	if ok {
+		return statusErr.Err()
+	}
+	spbErr := &spb.Status{
 		Code:    int32(codes.Unknown),
 		Message: err.Error(),
 		Details: []*any.Any{
 			{
 				TypeUrl: TypeUrlStack,
-				Value:   strx.Str2bytes(stack()),
+				Value:   []byte(fmt.Sprintf("%+v", err)),
 			},
 		},
 	}
-	return status.FromProto(s).Err()
+	return status.FromProto(spbErr).Err()
 }
 
-func WrapRPCError(err error) error {
+func WrapRPCError(err error, servName string) error {
 	if err == nil {
 		return nil
 	}
-	e, _ := status.FromError(err)
-	s := &spb.Status{
-		Code:    int32(e.Code()),
-		Message: e.Message(),
+	statusErr, ok := status.FromError(err)
+	if ok {
+		details := statusErr.Proto().GetDetails()
+		detailStr := ""
+		for _, v := range details {
+			detailStr += string(v.Value)
+		}
+		spbErr := &spb.Status{
+			Code:    int32(codes.Unknown),
+			Message: err.Error(),
+			Details: []*any.Any{
+				{
+					TypeUrl: TypeUrlStack,
+					Value:   []byte(fmt.Sprintf("%+v\n---grpc %s call----%s\n", err, servName, detailStr)),
+				},
+			},
+		}
+		for _, v := range details {
+			if ok {
+				fmt.Println("v = ", string(v.Value))
+			}
+		}
+		return status.FromProto(spbErr).Err()
+	}
+	spbErr := &spb.Status{
+		Code:    int32(codes.Unknown),
+		Message: err.Error(),
 		Details: []*any.Any{
 			{
 				TypeUrl: TypeUrlStack,
-				Value:   strx.Str2bytes(GetErrorStack(e) + " --grpc-- \n" + stack()),
+				Value:   []byte(fmt.Sprintf("%+v", err)),
 			},
 		},
 	}
-	return status.FromProto(s).Err()
-}
-
-func GetErrorStack(s *status.Status) string {
-	pbs := s.Proto()
-	for i := range pbs.Details {
-		if pbs.Details[i].TypeUrl == TypeUrlStack {
-			return strx.Bytes2str(pbs.Details[i].Value)
-		}
-	}
-	return ""
-}
-
-// Stack 获取堆栈信息
-func stack() string {
-	var pc = make([]uintptr, 20)
-	n := runtime.Callers(3, pc)
-
-	var build strings.Builder
-	for i := 0; i < n; i++ {
-		f := runtime.FuncForPC(pc[i] - 1)
-		file, line := f.FileLine(pc[i] - 1)
-		if n != -1 {
-			s := fmt.Sprintf(" %s:%d \n", file[:], line)
-			build.WriteString(s)
-		}
-	}
-	return build.String()
+	return status.FromProto(spbErr).Err()
 }

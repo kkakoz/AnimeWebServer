@@ -8,13 +8,17 @@ import (
 )
 
 var (
-	ErrUnknown           = status.New(codes.Unknown, "error unknown").Err()                           // 服务器未知错误
-	ErrUnauthorized      = newError(basepb.ErrorCode_EC_UNAUTHORIZED, "error unauthorized") // 未登录
-
+	ErrUnauthorized  = newError(basepb.ErrorCode_EC_UNAUTHORIZED, "请登录后进行操作") // 未登录
+	ErrServerUnknown = newError(basepb.ErrorCode_EC_SERVER_UNKNOWN, "未知错误")
 )
 
 func newError(code basepb.ErrorCode, message string) error {
 	return status.New(codes.Code(code), message).Err()
+}
+
+// 业务逻辑错误
+func NewBusErr(msg string) error {
+	return newError(basepb.ErrorCode_EC_BUSINESSERR, msg)
 }
 
 var InterruptErr = errors.New("gateway interrupt")

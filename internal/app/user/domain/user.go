@@ -7,8 +7,10 @@ import (
 
 type User struct {
 	gorm.Model
-	Name  string `json:"name"`
-	Phone string `json:"phone"`
+	Name     string `json:"name"`
+	Phone    string `json:"phone"`
+	Password string `json:"password"`
+	Salt     string `json:"salt"`
 }
 
 type UserInfo struct {
@@ -16,19 +18,20 @@ type UserInfo struct {
 	Name      string `json:"name"`
 	Phone     string `json:"phone"`
 	Token     string `json:"token"`
-	CreatedAt string
-	UpdatedAt string
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type IUserUsecase interface {
-	Login(ctx context.Context, phone string) (UserInfo, error)
-	CreateUser(ctx context.Context, phone string, name string) error
-	GetUserInfo(ctx context.Context, id int) (UserInfo, error)
+	Login(ctx context.Context, phone, password string) (*UserInfo, error)
+	Register(ctx context.Context, phone, name, password string) error
+	GetUserInfo(ctx context.Context, id int) (*UserInfo, error)
 	GetUserList(ctx context.Context, id []int) ([]UserInfo, error)
 }
 
 type IUserRepo interface {
 	AddUser(ctx context.Context, user *User) error
-	GetUserInfo(ctx context.Context, id int) (UserInfo, error)
-	GetUserList(ctx context.Context, id []int) ([]UserInfo, error)
+	GetUserInfo(ctx context.Context, id int) (*User, error)
+	GetUserList(ctx context.Context, id []int) ([]User, error)
+	GetUserByPhone(ctx context.Context, phone string) (*User, error)
 }

@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/google/wire"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -18,7 +19,7 @@ func NewApp(viper *viper.Viper, logger *zap.Logger, grpcServer *GrpcServer) (*Ap
 	app := &App{}
 	err := viper.UnmarshalKey("app", app)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "viper unmarshal失败")
 	}
 	app.grpcServer = grpcServer
 	return app, nil
@@ -27,7 +28,7 @@ func NewApp(viper *viper.Viper, logger *zap.Logger, grpcServer *GrpcServer) (*Ap
 func (a *App) Start() error {
 	err := a.grpcServer.run(a.Name, a.Host, a.Port)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "运行失败")
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package cache
 import (
 	"github.com/go-redis/redis"
 	"github.com/google/wire"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -22,7 +23,7 @@ func NewRedis(viper *viper.Viper) (*redis.Client, error) {
 	viper.SetDefault("redis.password", "")
 	err := viper.UnmarshalKey("redis", o)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "viper unmarshal失败")
 	}
 	options := &redis.Options{
 		Addr:               o.Host + ":" + o.Port,
@@ -33,7 +34,7 @@ func NewRedis(viper *viper.Viper) (*redis.Client, error) {
 
 	client := redis.NewClient(options)
 	_, err = client.Ping().Result()
-	return client, err
+	return client, errors.Wrap(err, "redis初始化失败")
 }
 
 

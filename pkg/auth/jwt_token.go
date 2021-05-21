@@ -3,13 +3,16 @@ package auth
 import (
 	"crypto/rsa"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"os"
 	"time"
 )
 
 type JwtTokenGen struct {
 	Issuer     string
-	Pem        string
+	PemPath    string
 	privateKey *rsa.PrivateKey
 	nowFunc    func() time.Time
 }
@@ -18,12 +21,21 @@ func NewJwtTokenGen(viper *viper.Viper) (*JwtTokenGen, error) {
 	j := &JwtTokenGen{}
 	err := viper.UnmarshalKey("jwt", j)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "viper unmarshal失败")
 	}
 	j.nowFunc = time.Now
-	j.privateKey, err = jwt.ParseRSAPrivateKeyFromPEM([]byte(j.Pem))
+	file, err := os.Open(j.PemPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "打开rsa privatekey文件失败")
+	}
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, errors.Wrap(err, "读取文件失败")
+	}
+
+	j.privateKey, err = jwt.ParseRSAPrivateKeyFromPEM(bytes)
+	if err != nil {
+		return nil, errors.Wrap(err, "viper unmarshal失败")
 	}
 	return j, nil
 }

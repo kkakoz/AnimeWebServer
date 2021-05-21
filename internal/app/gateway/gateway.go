@@ -3,11 +3,11 @@ package gateway
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/coreos/etcd/clientv3"
 	proto "github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc/status"
 	"log"
 	"net/http"
 	"red-bean-anime-server/pkg/gerrors"
@@ -20,26 +20,28 @@ type Gateway struct {
 	port    string
 }
 
+type Res struct {
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
+}
+
 func NewGateway(ctx context.Context, etcdCli *clientv3.Client, viper *viper.Viper) *Gateway {
 	serveMux := runtime.NewServeMux(
 		runtime.WithProtoErrorHandler(handleErr),
 		runtime.WithForwardResponseOption(func(ctx context.Context, writer http.ResponseWriter, message proto.Message) error {
-			type Res struct {
-				Code int         `json:"code"`
-				Data interface{} `json:"data"`
-			}
 			s := Res{Code: 200}
 			s.Data = message
-			bytes, err := json.Marshal(s)
-			if err != nil {
-				return err
+			if message != nil {
+				bytes, err := json.Marshal(s)
+				if err != nil {
+					return err
+				}
+				_, err = writer.Write(bytes)
+				if err != nil {
+					return err
+				}
 			}
-			_, err = writer.Write(bytes)
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(message)
 			return gerrors.InterruptErr
 		}),
 	)
@@ -64,8 +66,19 @@ func handleErr(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Mar
 	if err == gerrors.InterruptErr {
 		return
 	}
+	type E struct {
+	}
+	statusErr, ok := status.FromError(err)
+	if ok {
+		s := Res{
+			Code: 200,
+			Msg: statusErr.Message(),
+		}
+		bytes, err := marshaler.Marshal(s)
+		log.Println(err)
+		_, err = writer.Write(bytes)
+		log.Println(err)
+	}
 
-	bytes, err := marshaler.Marshal(err)
-	_, err = writer.Write(bytes)
-	log.Println(err)
+
 }
