@@ -8,6 +8,7 @@ import (
 	"red-bean-anime-server/internal/app/gateway"
 	"red-bean-anime-server/pkg/cache"
 	"red-bean-anime-server/pkg/config"
+	"red-bean-anime-server/pkg/log"
 )
 
 func New(ctx context.Context, filepath string) (*gateway.Gateway, error) {
@@ -15,5 +16,6 @@ func New(ctx context.Context, filepath string) (*gateway.Gateway, error) {
 		config.ProviderSet,
 		cache.NewEtcd,
 		gateway.NewGateway,
+		log.NewLog,
 	))
 }

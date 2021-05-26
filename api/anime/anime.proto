@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+option go_package = "./;animepb";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+//import "google/protobuf/timestamp.proto";
+
+service AnimeService {
+  rpc AddCategory (AddCategoryReq) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/category"
+      body: "*"
+    };
+  };
+
+  rpc CategoryList (google.protobuf.Empty) returns (CategoryListRes) {
+    option (google.api.http) = {
+      get: "/category"
+    };
+  };
+
+//  rpc AddAnime (AddAnimeReq) returns (google.protobuf.Empty) {
+//    option (google.api.http) = {
+//      post: "/anime"
+//      body: "*"
+//    };
+//  };
+//
+//  rpc AddVideo (AddVideoReq) returns (google.protobuf.Empty) {
+//    option (google.api.http) = {
+//      post: "/video"
+//      body: "*"
+//    };
+//  };
+//
+//  rpc AnimeList (AnimeListReq) returns (AnimeListRes) {
+//    option (google.api.http) = {
+//      get: "/anime"
+//    };
+//  };
+}
+
+message AddCategoryReq {
+  string name = 1;
+}
+
+message CategoryListRes {
+  repeated Category categoryList = 1;
+  int64 count = 2;
+}
+
+message Category {
+  int64 id = 1;
+  string name = 2;
+}
+
+message AddAnimeReq {
+  string name = 1;
+  string description = 2;
+  int32 year = 3;
+  int32 quarter = 4;
+  repeated int64 categoryId = 5;
+}
+
+message AddVideoReq {
+  int32 episode = 1;
+  string name = 2;
+  string url = 3;
+}
+
+message GetAnimeListReq {
+  int32 page = 1;
+  int32 pageSize = 2;
+  int32 type = 3;
+  int32 sort = 4;
+}
+
+message AnimeListRes {
+  repeated AnimeRes animeinfo = 1;
+}
+
+message AnimeRes {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string imageUrl = 4;
+  int32 year = 5;
+  int32 quarter = 6;
+}
+
+message VideoInfo {
+  int64 id = 1;
+  int32 episode = 2;
+  string name = 3;
+  string url = 4;
+}

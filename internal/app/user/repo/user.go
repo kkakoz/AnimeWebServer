@@ -12,12 +12,12 @@ type UserRepo struct {
 	redis *redis.Client
 }
 
-func NewUserRepo(redis *redis.Client) *UserRepo {
+func NewUserRepo(redis *redis.Client) domain.IUserRepo {
 	return &UserRepo{redis: redis}
 }
 
 func (u *UserRepo) AddUser(ctx context.Context, user *domain.User) error {
-	db, err := mysqlx.GetDB(ctx)
+	db, err := mysql.GetDB(ctx)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (u *UserRepo) AddUser(ctx context.Context, user *domain.User) error {
 }
 
 func (u *UserRepo) GetUserInfo(ctx context.Context, id int) (*domain.User, error) {
-	db, err := mysqlx.GetDB(ctx)
+	db, err := mysql.GetDB(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (u *UserRepo) GetUserInfo(ctx context.Context, id int) (*domain.User, error
 }
 
 func (u *UserRepo) GetUserByPhone(ctx context.Context, phone string) (*domain.User, error) {
-	db, err := mysqlx.GetDB(ctx)
+	db, err := mysql.GetDB(ctx)
 	if err != nil {
 		return nil, err
 	}

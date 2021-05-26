@@ -11,13 +11,6 @@ import (
 )
 
 func NewUserClient(ctx context.Context, etcdClient *clientv3.Client) (userpb.UserServiceClient, error) {
-	//robin := grpc.Roundbin(resolver)
-	//conn, err := grpc.Dial(UserBalancerKey, grpc.WithBalancer(robin))
-	//if err != nil {
-	//	return nil, err
-	//}
-	//client := userpb.NewUserServiceClient(conn)
-	//return client, nil
 	r := loadbalancing.NewServiceDiscovery(ctx, etcdClient)
 	resolver.Register(r)
 	conn, err := grpc.Dial(

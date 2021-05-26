@@ -7,14 +7,13 @@ baseProto:
 			--go_out=plugins=grpc:./api/base/ \
 			 ./api/base/*.proto
 
-.PHONY: videoProto
-videoProto:
+.PHONY: animeProto
+animeProto:
 		protoc -I. -I$(GOPATH)/include \
-			--go_out . --go_opt paths=source_relative \
-			--go-grpc_out . --go-grpc_opt paths=source_relative \
+			--go_out=plugins=grpc:./api/anime/ \
 			--grpc-gateway_out . --grpc-gateway_opt paths=source_relative \
 			 --grpc-gateway_opt logtostderr=true \
-			 ./api/video/*.proto
+			 ./api/anime/*.proto
 
 .PHONY: userProto
 userProto:

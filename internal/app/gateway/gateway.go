@@ -6,9 +6,10 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	proto "github.com/golang/protobuf/proto"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/status"
-	"log"
 	"net/http"
 	"red-bean-anime-server/pkg/gerrors"
 )
@@ -18,6 +19,7 @@ type Gateway struct {
 	mux     *runtime.ServeMux
 	ctx     context.Context
 	port    string
+	logger  *zap.Logger
 }
 
 type Res struct {
@@ -26,27 +28,13 @@ type Res struct {
 	Data interface{} `json:"data"`
 }
 
-func NewGateway(ctx context.Context, etcdCli *clientv3.Client, viper *viper.Viper) *Gateway {
+func NewGateway(ctx context.Context, etcdCli *clientv3.Client, viper *viper.Viper, logger *zap.Logger) *Gateway {
 	serveMux := runtime.NewServeMux(
-		runtime.WithProtoErrorHandler(handleErr),
-		runtime.WithForwardResponseOption(func(ctx context.Context, writer http.ResponseWriter, message proto.Message) error {
-			s := Res{Code: 200}
-			s.Data = message
-			if message != nil {
-				bytes, err := json.Marshal(s)
-				if err != nil {
-					return err
-				}
-				_, err = writer.Write(bytes)
-				if err != nil {
-					return err
-				}
-			}
-			return gerrors.InterruptErr
-		}),
+		runtime.WithProtoErrorHandler(NewHandleErr(logger)),
+		runtime.WithForwardResponseOption(NewResHandler()),
 	)
 	port := viper.Sub("gateway").GetString("port")
-	return &Gateway{etcdCli: etcdCli, mux: serveMux, ctx: ctx, port: port}
+	return &Gateway{etcdCli: etcdCli, mux: serveMux, ctx: ctx, port: port, logger: logger}
 }
 
 func (g *Gateway) Start() error {
@@ -54,7 +42,7 @@ func (g *Gateway) Start() error {
 	if err != nil {
 		return err
 	}
-	log.Println("gateway start")
+	g.logger.Info("gateway start")
 	err = http.ListenAndServe(":"+g.port, g.mux)
 	if err != nil {
 		return err
@@ -62,23 +50,51 @@ func (g *Gateway) Start() error {
 	return nil
 }
 
-func handleErr(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, writer http.ResponseWriter, request *http.Request, err error) {
-	if err == gerrors.InterruptErr {
-		return
-	}
-	type E struct {
-	}
-	statusErr, ok := status.FromError(err)
-	if ok {
+func NewHandleErr(logger *zap.Logger) runtime.ProtoErrorHandlerFunc {
+	return func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, writer http.ResponseWriter, request *http.Request, err error) {
+		if err == gerrors.InterruptErr {
+			return
+		}
+		statusErr, ok := status.FromError(err)
+		msg := err.Error()
+		if ok {
+			msg = statusErr.Message()
+			errs := make([]zap.Field, 0, len(statusErr.Proto().GetDetails()))
+			for _, detail := range statusErr.Proto().GetDetails() {
+				errs = append(errs, zap.Error(errors.New(string(detail.Value))))
+
+			}
+			logger.Error(msg, errs...)
+		}
 		s := Res{
 			Code: 200,
-			Msg: statusErr.Message(),
+			Msg:  msg,
 		}
 		bytes, err := marshaler.Marshal(s)
-		log.Println(err)
+		if err != nil {
+			logger.Error("err = ", zap.Error(err))
+		}
 		_, err = writer.Write(bytes)
-		log.Println(err)
+		if err != nil {
+			logger.Error("err = ", zap.Error(err))
+		}
 	}
+}
 
-
+func NewResHandler() func(context.Context, http.ResponseWriter, proto.Message) error {
+	return func(ctx context.Context, writer http.ResponseWriter, message proto.Message) error {
+		s := Res{Code: 200}
+		s.Data = message
+		if message != nil {
+			bytes, err := json.Marshal(s)
+			if err != nil {
+				return err
+			}
+			_, err = writer.Write(bytes)
+			if err != nil {
+				return err
+			}
+		}
+		return gerrors.InterruptErr
+	}
 }

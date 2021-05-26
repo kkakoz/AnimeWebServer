@@ -19,11 +19,16 @@ type Options struct {
 	Stdout     bool
 }
 
+var logger *zap.Logger
+
+func L() *zap.Logger {
+	return logger
+}
+
 func NewLog(viper *viper.Viper) (*zap.Logger, error) {
 	var (
 		err    error
 		level  = zap.NewAtomicLevel()
-		logger *zap.Logger
 		o = &Options{}
 	)
 	viper.SetDefault("log.filename", "temp/temp.log")

@@ -19,7 +19,7 @@ type UserUsecase struct {
 	db          *gorm.DB
 }
 
-func NewUserUsecase(userRepo domain.IUserRepo, jwtTokenGen *auth.JwtTokenGen, db *gorm.DB) *UserUsecase {
+func NewUserUsecase(userRepo domain.IUserRepo, jwtTokenGen *auth.JwtTokenGen, db *gorm.DB) domain.IUserUsecase {
 	return &UserUsecase{userRepo: userRepo, jwtTokenGen: jwtTokenGen, db: db}
 }
 

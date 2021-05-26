@@ -2,7 +2,9 @@ package grpcx
 
 import (
 	"context"
+	"fmt"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"red-bean-anime-server/pkg/gerrors"
@@ -29,6 +31,7 @@ func NewClientErrInterceptor(servName string) grpc.UnaryClientInterceptor {
 
 func RecoveryInterceptor() grpc_recovery.Option {
 	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
-		return grpc.Errorf(codes.Unknown, "panic triggered: %v", p)
+		err = errors.New(fmt.Sprintf("%v", p))
+		return grpc.Errorf(codes.Unknown, fmt.Sprintf("%+v", err))
 	})
 }
