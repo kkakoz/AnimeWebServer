@@ -18,19 +18,27 @@ type UserService struct {
 	userUsecase domain.IUserUsecase
 }
 
-func (u *UserService) Login(ctx context.Context, info *userpb.LoginInfo) (*userpb.LoginRes, error) {
-	return &userpb.LoginRes{
-		Token:                "hsidoahif",
-	}, nil
-}
-
-func (u *UserService) Register(ctx context.Context, info *userpb.RegisterReq) (*emptypb.Empty, error) {
-	err := u.userUsecase.Register(ctx, info.Phone, info.Name, info.Password)
+func (u *UserService) Register(ctx context.Context, req *userpb.RegisterReq) (*emptypb.Empty, error) {
+	err := u.userUsecase.Register(ctx, req.Email, req.Name, req.Password)
 	return &emptypb.Empty{}, err
 }
 
+func (u *UserService) Login(ctx context.Context, req *userpb.LoginInfo) (*userpb.LoginRes, error) {
+	userInfo, err := u.userUsecase.Login(ctx, req.Email, req.Password)
+	if err != nil {
+		return nil, err
+	}
+	return &userpb.LoginRes{
+		Id:       int64(userInfo.ID),
+		Name:     userInfo.Name,
+		Email:    userInfo.Email,
+		Token:    userInfo.Token,
+		CreateAt: userInfo.CreatedAt,
+	}, nil
+}
+
 func (u *UserService) UserInfo(ctx context.Context, id *userpb.Id) (*userpb.UserInfoRes, error) {
-	panic("implement me")
+	return &userpb.UserInfoRes{}, nil
 }
 
 func NewUserService(userUsercase domain.IUserUsecase) app.RegisterService {

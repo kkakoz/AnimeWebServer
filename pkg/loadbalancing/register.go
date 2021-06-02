@@ -60,7 +60,7 @@ func (s *ServiceRegister) putKeyWithLease() error {
 	//s.keepAliveChan = resChan
 	go func() {
 		for range resChan {
-			fmt.Println("kepp alive time = ", time.Now())
+
 		}
 		// keepalive关闭
 		s.retry <- struct{}{}
@@ -81,6 +81,7 @@ func (s *ServiceRegister) RegisterAndKeeplive() {
 	case <-s.ctx.Done():
 		return
 	case <-s.retry:
+		fmt.Println("retry")
 		time.Sleep(time.Duration(s.retryTime) * time.Second)
 		err := s.putKeyWithLease() // 重新进行服务注册
 		if err != nil {

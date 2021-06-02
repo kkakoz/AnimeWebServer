@@ -8,8 +8,8 @@ package main
 import (
 	"context"
 	"red-bean-anime-server/internal/app/gateway"
-	"red-bean-anime-server/pkg/cache"
 	"red-bean-anime-server/pkg/config"
+	"red-bean-anime-server/pkg/db/etcd"
 	"red-bean-anime-server/pkg/log"
 )
 
@@ -20,7 +20,7 @@ func New(ctx context.Context, filepath string) (*gateway.Gateway, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := cache.NewEtcd(viper)
+	client, err := etcd.NewEtcd(viper)
 	if err != nil {
 		return nil, err
 	}

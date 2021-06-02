@@ -8,6 +8,7 @@ replace (
 )
 
 require (
+	github.com/Shopify/sarama v1.29.0 // indirect
 	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
@@ -23,6 +24,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.23.0 // indirect
+	github.com/qiniu/qmgo v0.9.4 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.7.1
 	github.com/valyala/fasttemplate v1.2.1 // indirect

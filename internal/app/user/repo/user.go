@@ -17,7 +17,7 @@ func NewUserRepo(redis *redis.Client) domain.IUserRepo {
 }
 
 func (u *UserRepo) AddUser(ctx context.Context, user *domain.User) error {
-	db, err := mysql.GetDB(ctx)
+	db, err := mysqlx.GetDB(ctx)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (u *UserRepo) AddUser(ctx context.Context, user *domain.User) error {
 }
 
 func (u *UserRepo) GetUserInfo(ctx context.Context, id int) (*domain.User, error) {
-	db, err := mysql.GetDB(ctx)
+	db, err := mysqlx.GetDB(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -35,13 +35,13 @@ func (u *UserRepo) GetUserInfo(ctx context.Context, id int) (*domain.User, error
 	return user, errors.Wrap(err, "查找用户失败")
 }
 
-func (u *UserRepo) GetUserByPhone(ctx context.Context, phone string) (*domain.User, error) {
-	db, err := mysql.GetDB(ctx)
+func (u *UserRepo) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	db, err := mysqlx.GetDB(ctx)
 	if err != nil {
 		return nil, err
 	}
 	user := &domain.User{}
-	err = db.Where("phone = ?", phone).First(user).Error
+	err = db.Where("email = ?", email).First(user).Error
 	return user, errors.Wrap(err, "查找用户失败")
 }
 

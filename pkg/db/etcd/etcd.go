@@ -1,4 +1,4 @@
-package cache
+package etcd
 
 import (
 	"github.com/coreos/etcd/clientv3"
@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"red-bean-anime-server/pkg/cache"
 	"time"
 )
 
@@ -32,4 +33,4 @@ func NewEtcd(viper *viper.Viper) (*clientv3.Client, error) {
 	return client, nil
 }
 
-var ProverSet = wire.NewSet(NewEtcd, NewRedis)
+var ProverSet = wire.NewSet(NewEtcd, cache.NewRedis)

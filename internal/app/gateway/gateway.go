@@ -10,7 +10,9 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/status"
+	"log"
 	"net/http"
+	basepb "red-bean-anime-server/api/base"
 	"red-bean-anime-server/pkg/gerrors"
 )
 
@@ -52,23 +54,24 @@ func (g *Gateway) Start() error {
 
 func NewHandleErr(logger *zap.Logger) runtime.ProtoErrorHandlerFunc {
 	return func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, writer http.ResponseWriter, request *http.Request, err error) {
+		log.Println("http = ", request.RequestURI)
 		if err == gerrors.InterruptErr {
 			return
 		}
+		s := Res{
+			Code: 200,
+		}
 		statusErr, ok := status.FromError(err)
-		msg := err.Error()
-		if ok {
-			msg = statusErr.Message()
+		s.Msg = err.Error()
+		if ok && int32(statusErr.Code()) == int32(basepb.ErrorCode_EC_BUSINESSERR) { //
+			s.Code = int(basepb.ErrorCode_EC_BUSINESSERR)
+			s.Msg = statusErr.Message()
 			errs := make([]zap.Field, 0, len(statusErr.Proto().GetDetails()))
 			for _, detail := range statusErr.Proto().GetDetails() {
 				errs = append(errs, zap.Error(errors.New(string(detail.Value))))
 
 			}
-			logger.Error(msg, errs...)
-		}
-		s := Res{
-			Code: 200,
-			Msg:  msg,
+			logger.Error(s.Msg, errs...)
 		}
 		bytes, err := marshaler.Marshal(s)
 		if err != nil {

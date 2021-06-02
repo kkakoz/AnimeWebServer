@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "./;animepb";
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+//import "google/protobuf/timestamp.proto";
+
+
+service CountService {
+  rpc Like (LikeReq) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/animeapp/like"
+      body: "*"
+    };
+  };
+
+  rpc GetViewCount(AnimeIdReq) returns(CountRes) {}
+
+  rpc AddViewCount(AnimeIdReq) returns(google.protobuf.Empty) {}
+}
+
+message LikeReq {
+  int64 animeId = 1;
+  bool like = 2;
+}
+
+message AnimeIdReq {
+  int64 animeId = 1;
+}
+
+message CountRes {
+  int64 count = 1;
+}

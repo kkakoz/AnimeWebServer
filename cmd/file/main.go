@@ -18,6 +18,9 @@ func main() {
 	engine.GET("/file/video/:filename", fileService.GetVideo)
 	engine.GET("/file/image/:filename", fileService.GetImage)
 	err := engine.Start(":" + strconv.Itoa(*port))
+	//err := engine.StartTLS(":" + strconv.Itoa(*port),
+	//	"./configs/server.crt",
+	//	"./configs/server.key",)
 	if err != nil {
 		log.Fatal(err)
 	}

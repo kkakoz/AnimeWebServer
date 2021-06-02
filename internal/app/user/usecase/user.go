@@ -23,9 +23,12 @@ func NewUserUsecase(userRepo domain.IUserRepo, jwtTokenGen *auth.JwtTokenGen, db
 	return &UserUsecase{userRepo: userRepo, jwtTokenGen: jwtTokenGen, db: db}
 }
 
-func (u *UserUsecase) Login(ctx context.Context, phone, password string) (*domain.UserInfo, error) {
-	user, err := u.userRepo.GetUserByPhone(ctx, phone)
+func (u *UserUsecase) Login(ctx context.Context, email, password string) (*domain.UserInfo, error) {
+	user, err := u.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gerrors.NewBusErr("未找到用户")
+		}
 		return nil, err
 	}
 	token, err := u.jwtTokenGen.GenTokenExpire(strconv.Itoa(int(user.ID)), time.Hour*24*3)
@@ -38,31 +41,30 @@ func (u *UserUsecase) Login(ctx context.Context, phone, password string) (*domai
 	info := &domain.UserInfo{
 		ID:        int(user.ID),
 		Name:      user.Name,
-		Phone:     user.Phone,
+		Email:     user.Email,
 		Token:     token,
 		CreatedAt: times.FormatYMD(user.CreatedAt),
-		UpdatedAt: times.FormatYMD(user.UpdatedAt),
 	}
 	return info, nil
 }
 
-func (u *UserUsecase) Register(ctx context.Context, phone, name, password string) error {
-	_, err := u.userRepo.GetUserByPhone(ctx, phone)
+func (u *UserUsecase) Register(ctx context.Context, email, name, password string) error {
+	_, err := u.userRepo.GetUserByEmail(ctx, email)
 	if err == nil { // 如果找到用户
-		return gerrors.NewBusErr("该手机号已经注册")
+		return gerrors.NewBusErr("该邮箱已经注册")
 	}
-	if errors.Is(err, gorm.ErrRecordNotFound) { // 如果未找到了用户
-		salt := cryption.UUID()
-		user := &domain.User{
-			Name:     name,
-			Phone:    phone,
-			Password: cryption.Md5Str(password + salt),
-			Salt:     salt,
-		}
-		err := u.userRepo.AddUser(ctx, user)
-		return err
+	if !errors.Is(err, gorm.ErrRecordNotFound) { // 如果找到了用户
+		return err   // 其他err
 	}
-	return err   // 其他err
+	salt := cryption.UUID()
+	user := &domain.User{
+		Name:     name,
+		Email:    email,
+		Password: cryption.Md5Str(password + salt),
+		Salt:     salt,
+	}
+	err = u.userRepo.AddUser(ctx, user)
+	return err
 }
 
 func (u *UserUsecase) GetUserInfo(ctx context.Context, id int) (*domain.UserInfo, error) {

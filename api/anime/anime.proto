@@ -9,36 +9,42 @@ import "google/api/annotations.proto";
 service AnimeService {
   rpc AddCategory (AddCategoryReq) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/category"
+      post: "/animeapp/category"
       body: "*"
     };
   };
 
   rpc CategoryList (google.protobuf.Empty) returns (CategoryListRes) {
     option (google.api.http) = {
-      get: "/category"
+      get: "/animeapp/category"
     };
   };
 
-//  rpc AddAnime (AddAnimeReq) returns (google.protobuf.Empty) {
-//    option (google.api.http) = {
-//      post: "/anime"
-//      body: "*"
-//    };
-//  };
-//
-//  rpc AddVideo (AddVideoReq) returns (google.protobuf.Empty) {
-//    option (google.api.http) = {
-//      post: "/video"
-//      body: "*"
-//    };
-//  };
-//
-//  rpc AnimeList (AnimeListReq) returns (AnimeListRes) {
-//    option (google.api.http) = {
-//      get: "/anime"
-//    };
-//  };
+  rpc AddAnime (AddAnimeReq) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/animeapp/anime"
+      body: "*"
+    };
+  };
+
+  rpc AddVideo (AddVideoReq) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/animeapp/video"
+      body: "*"
+    };
+  };
+
+  rpc GetAnimeList (GetAnimeListReq) returns (AnimeListRes) {
+    option (google.api.http) = {
+      get: "/animeapp/anime/list"
+    };
+  };
+
+  rpc GetAnimeInfo (AnimeInfoReq) returns (AnimeInfoRes) {
+    option (google.api.http) = {
+      get: "/animeapp/anime"
+    };
+  };
 }
 
 message AddCategoryReq {
@@ -60,19 +66,21 @@ message AddAnimeReq {
   string description = 2;
   int32 year = 3;
   int32 quarter = 4;
-  repeated int64 categoryId = 5;
+  string firstPlayTime = 5;
+  repeated int64 categoryId = 6;
 }
 
 message AddVideoReq {
-  int32 episode = 1;
-  string name = 2;
-  string url = 3;
+  int64 animeId = 1;
+  int32 episode = 2;
+  string name = 3;
+  string url = 4;
 }
 
 message GetAnimeListReq {
   int32 page = 1;
   int32 pageSize = 2;
-  int32 type = 3;
+  int64 categoryId = 3;
   int32 sort = 4;
 }
 
@@ -87,6 +95,22 @@ message AnimeRes {
   string imageUrl = 4;
   int32 year = 5;
   int32 quarter = 6;
+}
+
+message AnimeInfoReq {
+  int64 id = 1;
+  int64 videoId = 2;
+}
+
+message AnimeInfoRes {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string imageUrl = 4;
+  int32 year = 5;
+  int32 quarter = 6;
+  int64 hits = 7;
+  repeated VideoInfo videoInfos = 8;
 }
 
 message VideoInfo {

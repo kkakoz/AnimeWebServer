@@ -14,6 +14,7 @@ import (
 	"red-bean-anime-server/pkg/auth"
 	"red-bean-anime-server/pkg/cache"
 	"red-bean-anime-server/pkg/config"
+	"red-bean-anime-server/pkg/db/etcd"
 	"red-bean-anime-server/pkg/db/mysqlx"
 	"red-bean-anime-server/pkg/log"
 )
@@ -29,7 +30,7 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := cache.NewEtcd(viper)
+	client, err := etcd.NewEtcd(viper)
 	if err != nil {
 		return nil, err
 	}

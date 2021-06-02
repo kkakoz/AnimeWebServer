@@ -9,7 +9,10 @@ import (
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"red-bean-anime-server/pkg/gerrors"
+	"gorm.io/gorm/logger"
+	"log"
+	"os"
+	"time"
 )
 
 var db *gorm.DB
@@ -38,7 +41,19 @@ func New(viper *viper.Viper) (*gorm.DB, error) {
 		o.User, o.Password,
 		o.Host, o.Port,
 		o.Name)
-	db, err = gorm.Open(mysql.Open(dns), &gorm.Config{})
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:              time.Second,   // Slow SQL threshold
+			LogLevel:                   logger.Info, // Log level
+			IgnoreRecordNotFoundError: true,           // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,          // Disable color
+		},
+	)
+	config := &gorm.Config{
+		Logger: newLogger,
+	}
+	db, err = gorm.Open(mysql.Open(dns),config)
 	return db, errors.Wrap(err, "打开mysql连接失败")
 }
 
@@ -72,7 +87,7 @@ func GetDB(ctx context.Context) (*gorm.DB, error) {
 	if iface != nil {
 		tx, ok := iface.(*gorm.DB)
 		if !ok {
-			return nil, gerrors.ErrServerUnknown
+			return nil, errors.New("获取db失败")
 		}
 
 		return tx, nil

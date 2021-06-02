@@ -43,19 +43,14 @@ func WrapRPCError(err error, servName string) error {
 			detailStr += string(v.Value)
 		}
 		spbErr := &spb.Status{
-			Code:    int32(codes.Unknown),
-			Message: err.Error(),
+			Code:    int32(statusErr.Code()),
+			Message: statusErr.Message(),
 			Details: []*any.Any{
 				{
 					TypeUrl: TypeUrlStack,
 					Value:   []byte(fmt.Sprintf("%+v\n---grpc %s call----%s\n", err, servName, detailStr)),
 				},
 			},
-		}
-		for _, v := range details {
-			if ok {
-				fmt.Println("v = ", string(v.Value))
-			}
 		}
 		return status.FromProto(spbErr).Err()
 	}

@@ -317,11 +317,11 @@ func RegisterUserServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 }
 
 var (
-	pattern_UserService_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "login"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UserService_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"animeapp", "user", "login"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_UserService_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "register"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UserService_Register_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"animeapp", "user", "register"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_UserService_UserInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"user", "info"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_UserService_UserInfo_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"animeapp", "user", "info"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (

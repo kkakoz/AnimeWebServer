@@ -10,6 +10,7 @@ import (
 	"red-bean-anime-server/internal/app/anime/domain"
 	"red-bean-anime-server/internal/app/anime/repo"
 	"red-bean-anime-server/internal/app/anime/usecase"
+	"red-bean-anime-server/internal/pkg/query"
 	"red-bean-anime-server/pkg/app"
 	"red-bean-anime-server/pkg/db/mysqlx"
 )
@@ -19,7 +20,56 @@ type AnimeService struct {
 	animeUsecase    domain.IAnimeUsecase
 }
 
+func (a *AnimeService) GetAnimeList(ctx context.Context, req *animepb.GetAnimeListReq) (*animepb.AnimeListRes, error) {
+	page := &query.Page{
+		Page:     int(req.Page),
+		PageSize: int(req.PageSize),
+	}
+	listReq := &domain.AnimeListReq{
+		CategoryId: req.CategoryId,
+		Sort:       req.Sort,
+	}
+	list, err := a.animeUsecase.GetAnimeList(ctx, page, listReq)
+	if err != nil {
+		return nil, err
+	}
+	animeListRes := make([]*animepb.AnimeRes, 0)
+	for _, anime := range list {
+		animeListRes = append(animeListRes, &animepb.AnimeRes{
+			Id:                   int64(anime.ID),
+			Name:                 anime.Name,
+			Description:          anime.Description,
+			ImageUrl:             anime.ImageUrl,
+			Year:                 anime.Year,
+			Quarter:              anime.Quarter,
+		})
+	}
+	res := &animepb.AnimeListRes{
+		Animeinfo: animeListRes,
+	}
+	return res, nil
+}
+
+func (a *AnimeService) GetAnimeInfo(ctx context.Context, req *animepb.AnimeInfoReq) (*animepb.AnimeInfoRes, error) {
+	//a.animeUsecase.GetAnimeInfo()
+	return nil, nil
+}
+
+func (a *AnimeService) AddAnime(ctx context.Context, req *animepb.AddAnimeReq) (*emptypb.Empty, error) {
+	addAnime := &domain.AddAnime{
+		Name:          req.Name,
+		Description:   req.Description,
+		Year:          req.Year,
+		Quarter:       req.Quarter,
+		FirstPlayTime: req.FirstPlayTime,
+		CategoryIds:   req.CategoryId,
+	}
+	err := a.animeUsecase.AddAnime(ctx, addAnime)
+	return &emptypb.Empty{}, err
+}
+
 func (a *AnimeService) AddCategory(ctx context.Context, req *animepb.AddCategoryReq) (*emptypb.Empty, error) {
+	log.Println("...")
 	err := a.categoryUsecase.AddCategory(ctx, req.Name)
 	return &emptypb.Empty{}, err
 }
@@ -44,6 +94,17 @@ func (a *AnimeService) CategoryList(ctx context.Context, empty *emptypb.Empty) (
 	return res, nil
 }
 
+func (a *AnimeService) AddVideo(ctx context.Context, req *animepb.AddVideoReq) (*emptypb.Empty, error) {
+	addVideo := &domain.AddVideo{
+		AnimeId: req.AnimeId,
+		Episode: req.Episode,
+		Name:    req.Name,
+		Url:     req.Url,
+	}
+	err := a.animeUsecase.AddVideo(ctx, addVideo)
+	return &emptypb.Empty{}, err
+}
+
 func NewAnimeService(categoryUsecase domain.ICategoryUsecase, animeUsecase domain.IAnimeUsecase) app.RegisterService {
 	animeService := &AnimeService{categoryUsecase: categoryUsecase, animeUsecase: animeUsecase}
 	return func(server *grpc.Server) {
@@ -51,7 +112,7 @@ func NewAnimeService(categoryUsecase domain.ICategoryUsecase, animeUsecase domai
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = db.AutoMigrate(&domain.Anime{}, &domain.Category{})
+		err = db.AutoMigrate(&domain.Anime{}, &domain.Category{}, &domain.AnimeCategory{}, &domain.Video{})
 		if err != nil {
 			log.Fatal(err)
 		}

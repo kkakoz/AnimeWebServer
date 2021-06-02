@@ -11,8 +11,8 @@ import (
 	"red-bean-anime-server/internal/app/anime/service"
 	"red-bean-anime-server/internal/app/anime/usecase"
 	"red-bean-anime-server/pkg/app"
-	"red-bean-anime-server/pkg/cache"
 	"red-bean-anime-server/pkg/config"
+	"red-bean-anime-server/pkg/db/etcd"
 	"red-bean-anime-server/pkg/db/mysqlx"
 	"red-bean-anime-server/pkg/log"
 )
@@ -28,7 +28,7 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := cache.NewEtcd(viper)
+	client, err := etcd.NewEtcd(viper)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	iCategoryRepo := repo.NewCategoryRepo()
 	iCategoryUsecase := usecase.NewCategoryUsecase(db, iCategoryRepo)
 	iAnimeRepo := repo.NewAnimeRepo()
-	iAnimeUsecase := usecase.NewAnimeUsecase(db, iAnimeRepo)
+	iAnimeUsecase := usecase.NewAnimeUsecase(db, iAnimeRepo, iCategoryRepo)
 	registerService := service.NewAnimeService(iCategoryUsecase, iAnimeUsecase)
 	grpcServer := app.NewGrpcServer(ctx, client, registerService)
 	appApp, err := app.NewApp(viper, logger, grpcServer)
