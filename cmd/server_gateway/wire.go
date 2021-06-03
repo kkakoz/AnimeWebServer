@@ -13,7 +13,7 @@ import (
 
 func New(ctx context.Context, filepath string) (*gateway.Gateway, error) {
 	panic(wire.Build(
-		config.ProviderSet,
+		config.ConfigSet,
 		etcd.NewEtcd,
 		gateway.NewGateway,
 		log.NewLog,

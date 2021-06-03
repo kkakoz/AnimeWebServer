@@ -8,27 +8,26 @@ import "google/api/annotations.proto";
 
 
 service CountService {
-  rpc Like (LikeReq) returns (google.protobuf.Empty) {
-    option (google.api.http) = {
-      post: "/animeapp/like"
-      body: "*"
-    };
-  };
+  rpc AddAnimeCount(AnimeIdReq) returns(google.protobuf.Empty) {}
 
-  rpc GetViewCount(AnimeIdReq) returns(CountRes) {}
+  rpc GetViewCount(AnimeIdsReq) returns(CountRes) {}
 
-  rpc AddViewCount(AnimeIdReq) returns(google.protobuf.Empty) {}
-}
-
-message LikeReq {
-  int64 animeId = 1;
-  bool like = 2;
+  rpc IncrViewCount(AnimeIdReq) returns(google.protobuf.Empty) {}
 }
 
 message AnimeIdReq {
   int64 animeId = 1;
 }
 
+message AnimeIdsReq {
+  repeated int64 animeId = 1;
+}
+
+message ViewCountRes {
+  repeated CountRes viewCount = 1;
+}
+
 message CountRes {
-  int64 count = 1;
+  int64 animeId = 1;
+  int64 countId = 2;
 }

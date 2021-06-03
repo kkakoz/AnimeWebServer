@@ -1,4 +1,15 @@
-package service
+package domain
+
+type ICountUsecase interface {
+	AddAnimeView(animeId int64) error
+	UserLikeAnime(userId int64, animeId int64, likeType bool) error
+	UserUnLikeAnime(userId int64, animeId int64, unlikeType bool) error
+	GetAnimeView(animeIds []int64) error
+}
+
+type ICountRepo interface {
+
+}
 
 type AnimeCount struct {
 	AnimeId      int64
@@ -17,12 +28,3 @@ type UserCollect struct {
 	AnimeId int64
 }
 
-type ICountUsecase interface {
-	AddAnimeView(animeId int) error
-	UserLikeAnime(animeId int, likeType bool) error
-
-}
-
-type ICountRepo interface {
-	ViewCacheIncr(animeId int) error
-}

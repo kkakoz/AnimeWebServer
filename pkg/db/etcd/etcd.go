@@ -33,4 +33,4 @@ func NewEtcd(viper *viper.Viper) (*clientv3.Client, error) {
 	return client, nil
 }
 
-var ProverSet = wire.NewSet(NewEtcd, cache.NewRedis)
+var EtcdSet = wire.NewSet(NewEtcd, cache.NewRedis)

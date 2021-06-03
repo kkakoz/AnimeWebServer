@@ -15,4 +15,4 @@ func NewConfig(path string) (*viper.Viper, error) {
 	return viper.GetViper(), nil
 }
 
-var ProviderSet = wire.NewSet(NewConfig)
+var ConfigSet = wire.NewSet(NewConfig)

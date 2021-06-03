@@ -55,9 +55,7 @@ func NewUserService(userUsercase domain.IUserUsecase) app.RegisterService {
 			log.Fatal(err)
 		}
 		userpb.RegisterUserServiceServer(server, userService)
-
 	}
-	//return &UserService{}
 }
 
-var ProviderSet = wire.NewSet(NewUserService, usecase.NewUserUsecase, repo.NewUserRepo)
+var ServiceSet = wire.NewSet(NewUserService, usecase.NewUserUsecase, repo.NewUserRepo)

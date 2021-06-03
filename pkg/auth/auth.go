@@ -10,4 +10,4 @@ type ITokenGenerator interface {
 	GenTokenExpire(id string, expire time.Duration) string
 }
 
-var ProviderSet = wire.NewSet(NewJwtTokenVerifier, NewJwtTokenGen)
+var AuthSet = wire.NewSet(NewJwtTokenVerifier, NewJwtTokenGen)

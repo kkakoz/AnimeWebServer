@@ -67,4 +67,4 @@ func NewLog(viper *viper.Viper) (*zap.Logger, error) {
 	return logger, nil
 }
 
-var ProviderSet = wire.NewSet(NewLog)
+var LogSet = wire.NewSet(NewLog)

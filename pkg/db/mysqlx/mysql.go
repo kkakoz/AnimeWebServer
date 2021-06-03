@@ -96,4 +96,4 @@ func GetDB(ctx context.Context) (*gorm.DB, error) {
 	return db.WithContext(ctx), nil
 }
 
-var ProviderSet = wire.NewSet(New)
+var MysqlSet = wire.NewSet(New)

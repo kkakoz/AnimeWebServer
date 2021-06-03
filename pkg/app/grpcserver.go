@@ -13,14 +13,15 @@ import (
 )
 
 type GrpcServer struct {
-	ctx        context.Context
-	etcdCli    *clientv3.Client
-	grpcServer *grpc.Server
+	ctx            context.Context
+	etcdCli        *clientv3.Client
+	grpcServer     *grpc.Server
+	registerServer RegisterService
 }
 
 type RegisterService func(server *grpc.Server)
 
-func NewGrpcServer(ctx context.Context, client *clientv3.Client, register RegisterService) (*GrpcServer) {
+func NewGrpcServer(ctx context.Context, client *clientv3.Client, register RegisterService) *GrpcServer {
 	g := &GrpcServer{}
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
@@ -29,10 +30,11 @@ func NewGrpcServer(ctx context.Context, client *clientv3.Client, register Regist
 			grpc_recovery.UnaryServerInterceptor(grpcx.RecoveryInterceptor()),
 		)),
 	)
-	register(server)
+
 	g.grpcServer = server
 	g.etcdCli = client
 	g.ctx = ctx
+	g.registerServer = register
 	return g
 }
 
@@ -41,6 +43,7 @@ func (s *GrpcServer) run(servname, host, port string) error {
 	if err != nil {
 		return err
 	}
+	s.registerServer(s.grpcServer)
 	_, err = loadbalancing.NewServiceRegister(s.ctx, s.etcdCli, servname, host+":"+port)
 	if err != nil {
 		return err

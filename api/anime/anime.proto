@@ -45,6 +45,20 @@ service AnimeService {
       get: "/animeapp/anime"
     };
   };
+
+  rpc AnimeLike (AnimeLikeReq) returns(google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/animeapp/anime/like",
+      body:"*",
+    };
+  }
+
+  rpc AnimeUnLike (AnimeLikeReq) returns(google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/animeapp/anime/unlike",
+      body:"*",
+    };
+  }
 }
 
 message AddCategoryReq {
@@ -110,7 +124,10 @@ message AnimeInfoRes {
   int32 year = 5;
   int32 quarter = 6;
   int64 hits = 7;
-  repeated VideoInfo videoInfos = 8;
+  int32 likeCount = 8;
+  int32 viewCount = 9;
+  int32 collectCount = 10;
+  repeated VideoInfo videoInfos = 11;
 }
 
 message VideoInfo {
@@ -118,4 +135,9 @@ message VideoInfo {
   int32 episode = 2;
   string name = 3;
   string url = 4;
+}
+
+message AnimeLikeReq {
+  int64 animeId = 1;
+  bool likeType = 2;
 }

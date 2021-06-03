@@ -33,4 +33,4 @@ func (a *App) Start() error {
 	return nil
 }
 
-var ProviderSet = wire.NewSet(NewApp, NewGrpcServer)
+var AppSet = wire.NewSet(NewApp, NewGrpcServer)

@@ -16,12 +16,12 @@ import (
 
 func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	panic(wire.Build(
-		config.ProviderSet,
-		app.ProviderSet,
-		etcd.ProverSet,
-		service.ProviderSet,
-		log.ProviderSet,
-		mysqlx.ProviderSet,
-		auth.ProviderSet,
+		config.ConfigSet,
+		app.AppSet,
+		etcd.EtcdSet,
+		service.ServiceSet,
+		log.LogSet,
+		mysqlx.MysqlSet,
+		auth.AuthSet,
 	))
 }
