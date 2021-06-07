@@ -36,12 +36,12 @@ func (a *AnimeService) GetAnimeList(ctx context.Context, req *animepb.GetAnimeLi
 	animeListRes := make([]*animepb.AnimeRes, 0)
 	for _, anime := range list {
 		animeListRes = append(animeListRes, &animepb.AnimeRes{
-			Id:                   int64(anime.ID),
-			Name:                 anime.Name,
-			Description:          anime.Description,
-			ImageUrl:             anime.ImageUrl,
-			Year:                 anime.Year,
-			Quarter:              anime.Quarter,
+			Id:          int64(anime.ID),
+			Name:        anime.Name,
+			Description: anime.Description,
+			ImageUrl:    anime.ImageUrl,
+			Year:        anime.Year,
+			Quarter:     anime.Quarter,
 		})
 	}
 	res := &animepb.AnimeListRes{

@@ -11,6 +11,7 @@ import (
 const (
 	UserServName = "user-serv"
 	AnimeServName = "anime-serv"
+	CountServName = "count-serv"
 )
 
 type ServiceRegister struct {

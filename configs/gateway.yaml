@@ -7,7 +7,7 @@ etcd:
   dial-timeout: 1
 
 log:
-  filename: /tmp/details.log
+  filename: /tmp/gateway.log
   maxSize: 500
   maxBackups: 3
   maxAge: 3

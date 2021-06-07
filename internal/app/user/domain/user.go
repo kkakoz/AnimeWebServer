@@ -2,19 +2,19 @@ package domain
 
 import (
 	"context"
-	"gorm.io/gorm"
+	"red-bean-anime-server/pkg/db/mysqlx"
 )
 
 type User struct {
-	gorm.Model
-	Name     string `json:"name" gorm:"size:20"`
-	Email    string `json:"email" gorm:"size:50"`
-	Password string `json:"password" gorm:"size:50"`
-	Salt     string `json:"salt" gorm:"size:50"`
+	mysqlx.Model
+	Name     string `json:"name" gorm:"size:24"`
+	Email    string `json:"email" gorm:"size:24"`
+	Password string `json:"password" gorm:"size:64"`
+	Salt     string `json:"salt" gorm:"size:64"`
 }
 
 type UserInfo struct {
-	ID        int    `json:"id"`
+	ID        int64  `json:"id"`
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	Token     string `json:"token"`

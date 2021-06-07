@@ -3,32 +3,30 @@ package keys
 import "fmt"
 
 const (
-	AnimeIncrCountKey = "anime:incr:"
+	// incr hash pre key
+	HAnimeIncrCountKey = "anime:incr:"
+	// incr hash field pre key
+	HFAnimeIncrView    = "view"
+	HFAnimeIncrLike    = "like"
+	HFAnimeIncrCollect = "collect"
 
-
-	AnimeView = "anime:view:"
-	AnimeLike = "anime:like"
-	AnimeCollect = "anime:collect"
-	
 	AnimeBloomKey = "anime:bit:"
+	// view hash key
+	AnimeViewKey = "anime:view"
+	// like and collect pre key
+	AnimeLikeCollectCountKey = "anime:count:"
 )
 
-func GetAnimeCountIncrKey(animeId int64) string {
-	return fmt.Sprintf("%s%d", AnimeIncrCountKey, animeId)
-}
+var HFAnimeIncrs = []string{HFAnimeIncrView, HFAnimeIncrLike, HFAnimeIncrView}
 
-func GetAnimeViewKey() string {
-	return AnimeView
-}
-
-func GetAnimeLikeKey() string {
-	return AnimeLike
-}
-
-func GetAnimeCollectKey() string {
-	return AnimeCollect
+func GetHAnimeCountIncrKey(animeId int64) string {
+	return fmt.Sprintf("%s%d", HAnimeIncrCountKey, animeId)
 }
 
 func GetAnimeBloomKey(animeId int64) string {
 	return fmt.Sprintf("%s%d", AnimeBloomKey, animeId)
+}
+
+func GetAnimeViewKey() string {
+	return AnimeViewKey
 }

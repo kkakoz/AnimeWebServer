@@ -2,12 +2,12 @@ package domain
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"red-bean-anime-server/internal/pkg/query"
+	"red-bean-anime-server/pkg/db/mysqlx"
 )
 
 type Video struct {
-	gorm.Model
+	mysqlx.Model
 	AnimeId int64  `json:"anime_id"`
 	Episode int32  `json:"episode"`
 	Name    string `json:"name"`
@@ -25,7 +25,7 @@ type AddVideo struct {
 }
 
 type Anime struct {
-	gorm.Model
+	mysqlx.Model
 	Name          string `json:"name"`
 	Description   string `json:"description"`
 	Year          int32  `json:"year"`
@@ -36,7 +36,7 @@ type Anime struct {
 }
 
 type AnimeInfoRes struct {
-	gorm.Model
+	mysqlx.Model
 	Name          string `json:"name"`
 	Description   string `json:"description"`
 	Year          int32  `json:"year"`

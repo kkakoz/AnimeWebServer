@@ -39,7 +39,7 @@ func (u *UserUsecase) Login(ctx context.Context, email, password string) (*domai
 		return nil, gerrors.NewBusErr("密码错误")
 	}
 	info := &domain.UserInfo{
-		ID:        int(user.ID),
+		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
 		Token:     token,

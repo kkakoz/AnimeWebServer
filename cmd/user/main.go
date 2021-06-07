@@ -3,14 +3,22 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/spf13/viper"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	var configFile = flag.String("f", "configs/user.yaml", "set config file which viper will loading.")
-	viper.AddConfigPath(*configFile)
-	ctx := context.TODO()
+	var configFile = flag.String("f", "configs/anime.yaml", "set config file which viper will loading.")
+	flag.Parse()
+	ctx, cancel := context.WithCancel(context.Background())
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sig
+		cancel()
+	}()
 	app, err := NewApp(ctx, *configFile)
 	if err != nil {
 		log.Fatal("run new failed:", err)

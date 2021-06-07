@@ -44,16 +44,16 @@ func New(viper *viper.Viper) (*gorm.DB, error) {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:              time.Second,   // Slow SQL threshold
-			LogLevel:                   logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,           // Ignore ErrRecordNotFound error for logger
-			Colorful:                  false,          // Disable color
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,       // Disable color
 		},
 	)
 	config := &gorm.Config{
 		Logger: newLogger,
 	}
-	db, err = gorm.Open(mysql.Open(dns),config)
+	db, err = gorm.Open(mysql.Open(dns), config)
 	return db, errors.Wrap(err, "打开mysql连接失败")
 }
 
@@ -94,6 +94,13 @@ func GetDB(ctx context.Context) (*gorm.DB, error) {
 	}
 
 	return db.WithContext(ctx), nil
+}
+
+type Model struct {
+	ID        int64 `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 var MysqlSet = wire.NewSet(New)

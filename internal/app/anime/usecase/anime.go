@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	countpb "red-bean-anime-server/api/count"
 	"red-bean-anime-server/internal/app/anime/domain"
 	"red-bean-anime-server/internal/pkg/query"
 	"red-bean-anime-server/pkg/db/mysqlx"
@@ -13,6 +14,7 @@ type AnimeUsecase struct {
 	db           *gorm.DB
 	animeRepo    domain.IAnimeRepo
 	categoryRepo domain.ICategoryRepo
+	countCli     countpb.CountServiceClient
 }
 
 func (a *AnimeUsecase) GetAnimeInfo(ctx, animeId int64, videoId int64) ([]domain.AnimeInfoRes, error) {
@@ -25,10 +27,6 @@ func (a *AnimeUsecase) GetAnimeList(ctx context.Context, page *query.Page, req *
 		return animes, err
 	}
 	return a.animeRepo.GetAnimeList(ctx, page, req.Sort)
-}
-
-func NewAnimeUsecase(db *gorm.DB, animeRepo domain.IAnimeRepo, categoryRepo domain.ICategoryRepo) domain.IAnimeUsecase {
-	return &AnimeUsecase{db: db, animeRepo: animeRepo, categoryRepo: categoryRepo}
 }
 
 func (a *AnimeUsecase) AddAnime(ctx context.Context, addAnime *domain.AddAnime) error {
@@ -49,6 +47,11 @@ func (a *AnimeUsecase) AddAnime(ctx context.Context, addAnime *domain.AddAnime) 
 		tx.Rollback()
 		return err
 	}
+	_, err = a.countCli.AddAnimeCount(ctx, &countpb.AnimeIdReq{AnimeId: anime.ID})
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	return errors.Wrap(tx.Commit().Error, "添加动漫失败")
 }
 
@@ -61,4 +64,9 @@ func (a *AnimeUsecase) AddVideo(ctx context.Context, addVideo *domain.AddVideo) 
 	}
 	err := a.animeRepo.AddVideo(ctx, video)
 	return err
+}
+
+func NewAnimeUsecase(db *gorm.DB, animeRepo domain.IAnimeRepo,
+	categoryRepo domain.ICategoryRepo, countCli countpb.CountServiceClient) domain.IAnimeUsecase {
+	return &AnimeUsecase{db: db, animeRepo: animeRepo, categoryRepo: categoryRepo, countCli: countCli}
 }

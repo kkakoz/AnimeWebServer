@@ -3,14 +3,24 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/spf13/viper"
 	"log"
-	"red-bean-anime-server/internal/app/gateway"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	ctx := context.TODO()
-	ctx = context.WithValue(ctx, gateway.Gateway{}, struct {}{})
-	var configFile = flag.String("f", "configs/gateway.yaml", "set config file which viper will loading.")
+	var configFile = flag.String("f", "configs/anime.yaml", "set config file which viper will loading.")
+	flag.Parse()
+	viper.AddConfigPath(*configFile)
+	ctx, cancel := context.WithCancel(context.Background())
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sig
+		cancel()
+	}()
 	gateway, err := New(ctx, *configFile)
 	if err != nil {
 		log.Fatal("new gateway err:", err)

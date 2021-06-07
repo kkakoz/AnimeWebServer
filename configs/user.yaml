@@ -9,7 +9,7 @@ db:
   port: 3306
   name: red_bean_anime
 log:
-  filename: /tmp/details.log
+  filename: /tmp/user.log
   maxSize: 500
   maxBackups: 3
   maxAge: 3

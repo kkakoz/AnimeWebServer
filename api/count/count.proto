@@ -1,18 +1,18 @@
 syntax = "proto3";
 
-option go_package = "./;animepb";
+option go_package = "./;countpb";
 
 import "google/protobuf/empty.proto";
-import "google/api/annotations.proto";
+//import "google/api/annotations.proto";
 //import "google/protobuf/timestamp.proto";
 
 
 service CountService {
   rpc AddAnimeCount(AnimeIdReq) returns(google.protobuf.Empty) {}
 
-  rpc GetViewCount(AnimeIdsReq) returns(CountRes) {}
+  rpc GetViewCount(AnimeIdsReq) returns(ViewCountRes) {}
 
-  rpc IncrViewCount(AnimeIdReq) returns(google.protobuf.Empty) {}
+  rpc GetAnimeCount(AnimeIdReq) returns(AnimeCountRes) {}
 }
 
 message AnimeIdReq {
@@ -24,10 +24,16 @@ message AnimeIdsReq {
 }
 
 message ViewCountRes {
-  repeated CountRes viewCount = 1;
+  repeated CountRes viewCounts = 1;
 }
 
 message CountRes {
   int64 animeId = 1;
-  int64 countId = 2;
+  int64 count = 2;
+}
+
+message AnimeCountRes {
+  int64 animeId = 1;
+  int64 likeCount = 2;
+  int64 collectCount = 3;
 }

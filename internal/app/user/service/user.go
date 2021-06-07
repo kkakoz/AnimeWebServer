@@ -29,7 +29,7 @@ func (u *UserService) Login(ctx context.Context, req *userpb.LoginInfo) (*userpb
 		return nil, err
 	}
 	return &userpb.LoginRes{
-		Id:       int64(userInfo.ID),
+		Id:       userInfo.ID,
 		Name:     userInfo.Name,
 		Email:    userInfo.Email,
 		Token:    userInfo.Token,

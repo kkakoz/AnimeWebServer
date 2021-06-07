@@ -22,6 +22,14 @@ userProto:
 			--grpc-gateway_out . --grpc-gateway_opt paths=source_relative \
 			 --grpc-gateway_opt logtostderr=true \
 			 ./api/user/*.proto
+
+.PHONY: countProto
+countProto:
+	protoc -I. -I$(GOPATH)/include \
+		--go_out=plugins=grpc:./api/count/ \
+		--grpc-gateway_out . --grpc-gateway_opt paths=source_relative \
+		 --grpc-gateway_opt logtostderr=true \
+		 ./api/count/*.proto
 #       --go_out . --go_opt paths=source_relative \
 #		-
 #		--go_out=plugins=grpc:. ./api/video/v1/hello.proto
