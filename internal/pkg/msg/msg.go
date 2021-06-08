@@ -15,3 +15,7 @@ const (
 	MsgTypeCollect       = 6
 	MsgTypeCollectCancel = 7
 )
+
+const (
+	MsgTypeCountTopic = "count-msg"
+)

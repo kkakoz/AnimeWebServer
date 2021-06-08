@@ -5,11 +5,14 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"os"
+	"red-bean-anime-server/pkg/gerrors"
 )
 
 type JwtTokenVerifier struct {
-	PublicKey string
-	publicKey *rsa.PublicKey
+	PublicKeyPath string
+	publicKey     *rsa.PublicKey
 }
 
 func NewJwtTokenVerifier(viper *viper.Viper) (*JwtTokenVerifier, error) {
@@ -18,7 +21,15 @@ func NewJwtTokenVerifier(viper *viper.Viper) (*JwtTokenVerifier, error) {
 	if err != nil {
 		return nil, err
 	}
-	pem, err := jwt.ParseRSAPublicKeyFromPEM([]byte(verifier.PublicKey))
+	file, err := os.Open(verifier.PublicKeyPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "打开rsa privatekey文件失败")
+	}
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, errors.Wrap(err, "读取文件失败")
+	}
+	pem, err := jwt.ParseRSAPublicKeyFromPEM(bytes)
 	if err != nil {
 		return nil, err
 	}
@@ -34,15 +45,16 @@ func (v *JwtTokenVerifier) Verifier(token string) (string, error) {
 		return "", err
 	}
 	if !t.Valid {
-		return "", errors.New("token not valid")
+		return "", gerrors.ErrUnauthorized
 	}
 	clm, ok := t.Claims.(*jwt.StandardClaims)
 	if !ok {
-		return "", errors.New("token not standardclaims")
+		return "", gerrors.ErrUnauthorized
 	}
 
 	if err = clm.Valid(); err != nil {
-		return "", errors.New("claim not valid:" + err.Error())
+		return "", gerrors.ErrUnauthorized
 	}
+
 	return clm.Subject, nil
 }

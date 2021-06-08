@@ -20,6 +20,15 @@ type AnimeService struct {
 	animeUsecase    domain.IAnimeUsecase
 }
 
+func (a *AnimeService) AnimeLike(ctx context.Context, req *animepb.AnimeLikeReq) (*emptypb.Empty, error) {
+	err := a.animeUsecase.UserLikeAnime(ctx, req.AnimeId, req.LikeType)
+	return &emptypb.Empty{}, err
+}
+
+func (a *AnimeService) AnimeUnLike(ctx context.Context, req *animepb.AnimeLikeReq) (*emptypb.Empty, error) {
+	panic("implement me")
+}
+
 func (a *AnimeService) GetAnimeList(ctx context.Context, req *animepb.GetAnimeListReq) (*animepb.AnimeListRes, error) {
 	page := &query.Page{
 		Page:     int(req.Page),
@@ -51,8 +60,7 @@ func (a *AnimeService) GetAnimeList(ctx context.Context, req *animepb.GetAnimeLi
 }
 
 func (a *AnimeService) GetAnimeInfo(ctx context.Context, req *animepb.AnimeInfoReq) (*animepb.AnimeInfoRes, error) {
-	//a.animeUsecase.GetAnimeInfo()
-	return nil, nil
+	panic("not implement")
 }
 
 func (a *AnimeService) AddAnime(ctx context.Context, req *animepb.AddAnimeReq) (*emptypb.Empty, error) {
@@ -70,6 +78,7 @@ func (a *AnimeService) AddAnime(ctx context.Context, req *animepb.AddAnimeReq) (
 
 func (a *AnimeService) AddCategory(ctx context.Context, req *animepb.AddCategoryReq) (*emptypb.Empty, error) {
 	log.Println("...")
+	req.Validate()
 	err := a.categoryUsecase.AddCategory(ctx, req.Name)
 	return &emptypb.Empty{}, err
 }
@@ -95,7 +104,7 @@ func (a *AnimeService) CategoryList(ctx context.Context, empty *emptypb.Empty) (
 }
 
 func (a *AnimeService) AddVideo(ctx context.Context, req *animepb.AddVideoReq) (*emptypb.Empty, error) {
-	addVideo := &domain.AddVideo{
+	addVideo := &domain.Video{
 		AnimeId: req.AnimeId,
 		Episode: req.Episode,
 		Name:    req.Name,

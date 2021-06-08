@@ -25,7 +25,7 @@ func NewCountConsumerRunner(countUsecase domain.ICountUsecase)  kafkax.ConsumerR
 		case msg.MsgTypeUnlike:
 			return countUsecase.UserUnLikeAnime(countMsg.UserId, countMsg.AnimeId, true)
 		case msg.MsgTypeUnlikeCancel:
-			return countUsecase.UserUnLikeAnime(countMsg.UserId, countMsg.AnimeId, true)
+			return countUsecase.UserUnLikeAnime(countMsg.UserId, countMsg.AnimeId, false)
 		case msg.MsgTypeAddView:
 			return countUsecase.AddAnimeView(countMsg.AnimeId)
 		case msg.MsgTypeCollect:
@@ -38,4 +38,10 @@ func NewCountConsumerRunner(countUsecase domain.ICountUsecase)  kafkax.ConsumerR
 	}
 }
 
-var CountConsumerSet = wire.NewSet(NewCountConsumerRunner)
+func GetTopic() kafkax.GetTopic {
+	return func() []string {
+		return []string{msg.MsgTypeCountTopic}
+	}
+}
+
+var CountConsumerSet = wire.NewSet(NewCountConsumerRunner, GetTopic)

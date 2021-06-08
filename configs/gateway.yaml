@@ -1,5 +1,5 @@
 gateway:
-  port: 10011
+  port: 10012
 
 etcd:
   endpoints:

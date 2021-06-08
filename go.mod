@@ -8,10 +8,11 @@ replace (
 )
 
 require (
-	github.com/Shopify/sarama v1.29.0
+	github.com/Shopify/sarama v1.24.1
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
 	github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/envoyproxy/protoc-gen-validate v0.6.1
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang/glog v0.0.0-20210429001901-424d2337a529 // indirect
 	github.com/golang/protobuf v1.5.2

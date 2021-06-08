@@ -11,7 +11,18 @@ type User struct {
 	Email    string `json:"email" gorm:"size:24"`
 	Password string `json:"password" gorm:"size:64"`
 	Salt     string `json:"salt" gorm:"size:64"`
+	State    int    `json:"state"`
+	Auth     int    `json:"auth"`
 }
+
+const (
+	UserAuthNromal = 1
+	UserAuthAdmin  = 2
+)
+
+const (
+	UserStateNormal = 1
+)
 
 type UserInfo struct {
 	ID        int64  `json:"id"`

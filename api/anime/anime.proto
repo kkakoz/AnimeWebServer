@@ -5,6 +5,7 @@ option go_package = "./;animepb";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 //import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
 
 service AnimeService {
   rpc AddCategory (AddCategoryReq) returns (google.protobuf.Empty) {
@@ -76,26 +77,26 @@ message Category {
 }
 
 message AddAnimeReq {
-  string name = 1;
-  string description = 2;
-  int32 year = 3;
-  int32 quarter = 4;
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string description = 2 [(validate.rules).string.min_len = 1];
+  int32 year = 3 [(validate.rules).int32.lt = 1900];
+  int32 quarter = 4 [(validate.rules).int32 = {gt: 0, lt: 12}];
   string firstPlayTime = 5;
-  repeated int64 categoryId = 6;
+  repeated int64 categoryId = 6 [(validate.rules).repeated.min_items = 1];
 }
 
 message AddVideoReq {
-  int64 animeId = 1;
-  int32 episode = 2;
-  string name = 3;
-  string url = 4;
+  int64 animeId = 1 [(validate.rules).int64.gt = 0];
+  int32 episode = 2 [(validate.rules).int32.gt = 0];
+  string name = 3 [(validate.rules).string.min_len = 1];
+  string url = 4 [(validate.rules).string.min_len = 1];
 }
 
 message GetAnimeListReq {
-  int32 page = 1;
-  int32 pageSize = 2;
-  int64 categoryId = 3;
-  int32 sort = 4;
+  int32 page = 1 [(validate.rules).int32.gt = 0];
+  int32 pageSize = 2 [(validate.rules).int32 = {gte:4, lte: 20}];
+  int64 categoryId = 3 [(validate.rules).int64.gt = 0];
+  int32 sort = 4 [(validate.rules).int32.gt = 0];
 }
 
 message AnimeListRes {
@@ -112,8 +113,7 @@ message AnimeRes {
 }
 
 message AnimeInfoReq {
-  int64 id = 1;
-  int64 videoId = 2;
+  int64 id = 1 [(validate.rules).int64.gt = 0];
 }
 
 message AnimeInfoRes {
@@ -138,6 +138,6 @@ message VideoInfo {
 }
 
 message AnimeLikeReq {
-  int64 animeId = 1;
+  int64 animeId = 1 [(validate.rules).int64.gt = 0];
   bool likeType = 2;
 }

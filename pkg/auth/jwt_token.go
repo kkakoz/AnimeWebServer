@@ -17,6 +17,14 @@ type JwtTokenGen struct {
 	nowFunc    func() time.Time
 }
 
+type UserClaims struct {
+	UserId int64    `json:"user_id"`
+	Name   string `json:"username"`
+	State  int    `json:"state"`
+	Auth   int    `json:"auth"`
+	jwt.StandardClaims
+}
+
 func NewJwtTokenGen(viper *viper.Viper) (*JwtTokenGen, error) {
 	j := &JwtTokenGen{}
 	err := viper.UnmarshalKey("jwt", j)
@@ -40,12 +48,17 @@ func NewJwtTokenGen(viper *viper.Viper) (*JwtTokenGen, error) {
 	return j, nil
 }
 
-func (j *JwtTokenGen) GenTokenExpire(id string, expire time.Duration) (string, error) {
-	tkn := jwt.NewWithClaims(jwt.SigningMethodRS512, jwt.StandardClaims{
-		Issuer:    j.Issuer, // 签发人唯一标识
-		IssuedAt:  j.nowFunc().Unix(),
-		ExpiresAt: j.nowFunc().Add(expire).Unix(),
-		Subject:   id,
+func (j *JwtTokenGen) GenTokenExpire(id int64, name string, state, auth int, expire time.Duration) (string, error) {
+	tkn := jwt.NewWithClaims(jwt.SigningMethodRS512, UserClaims{
+		UserId:         id,
+		Name:           name,
+		State:          state,
+		Auth:           auth,
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    j.Issuer, // 签发人唯一标识
+			IssuedAt:  j.nowFunc().Unix(),
+			ExpiresAt: j.nowFunc().Add(expire).Unix(),
+		},
 	})
 	signedStr, err := tkn.SignedString(j.privateKey)
 	if err != nil {

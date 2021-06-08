@@ -2,11 +2,11 @@ package domain
 
 import (
 	"context"
-	"gorm.io/gorm"
+	"red-bean-anime-server/pkg/db/mysqlx"
 )
 
 type Category struct {
-	gorm.Model
+	mysqlx.Model
 	Name string `json:"name"`
 }
 

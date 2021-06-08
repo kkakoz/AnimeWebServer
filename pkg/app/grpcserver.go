@@ -28,7 +28,9 @@ func NewGrpcServer(ctx context.Context, client *clientv3.Client, register Regist
 			grpc_prometheus.UnaryServerInterceptor,
 			grpcx.ServerErrorInterceptor,
 			grpc_recovery.UnaryServerInterceptor(grpcx.RecoveryInterceptor()),
-		)),
+			grpcx.NewValidateInterceptor(),
+		),
+		),
 	)
 
 	g.grpcServer = server

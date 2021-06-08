@@ -12,6 +12,7 @@ import (
 	"red-bean-anime-server/internal/app/user/usecase"
 	"red-bean-anime-server/pkg/app"
 	"red-bean-anime-server/pkg/db/mysqlx"
+	"red-bean-anime-server/pkg/gerrors"
 )
 
 type UserService struct {
@@ -19,11 +20,19 @@ type UserService struct {
 }
 
 func (u *UserService) Register(ctx context.Context, req *userpb.RegisterReq) (*emptypb.Empty, error) {
-	err := u.userUsecase.Register(ctx, req.Email, req.Name, req.Password)
+	err := req.Validate()
+	if err != nil {
+		return nil, gerrors.NewParamErr(err)
+	}
+	err = u.userUsecase.Register(ctx, req.Email, req.Name, req.Password)
 	return &emptypb.Empty{}, err
 }
 
-func (u *UserService) Login(ctx context.Context, req *userpb.LoginInfo) (*userpb.LoginRes, error) {
+func (u *UserService) Login(ctx context.Context, req *userpb.LoginReq) (*userpb.LoginRes, error) {
+	err := req.Validate()
+	if err != nil {
+		return nil, gerrors.NewParamErr(err)
+	}
 	userInfo, err := u.userUsecase.Login(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err

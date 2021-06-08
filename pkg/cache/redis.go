@@ -38,4 +38,4 @@ func NewRedis(viper *viper.Viper) (*redis.Client, error) {
 }
 
 
-var ProviderSet = wire.NewSet(NewRedis)
+var RedisSet = wire.NewSet(NewRedis)

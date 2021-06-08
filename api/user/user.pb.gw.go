@@ -34,7 +34,7 @@ var _ = descriptor.ForMessage
 var _ = metadata.Join
 
 func request_UserService_Login_0(ctx context.Context, marshaler runtime.Marshaler, client UserServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq LoginInfo
+	var protoReq LoginReq
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -51,7 +51,7 @@ func request_UserService_Login_0(ctx context.Context, marshaler runtime.Marshale
 }
 
 func local_request_UserService_Login_0(ctx context.Context, marshaler runtime.Marshaler, server UserServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq LoginInfo
+	var protoReq LoginReq
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)

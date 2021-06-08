@@ -35,7 +35,7 @@ func (f *FileService) UploadVideo(ctx echo.Context) error  {
 	if err != nil {
 		return err
 	}
-	return echox.ToRes(ctx, fileName);
+	return echox.ToRes(ctx, "/file/video/" + fileName);
 }
 
 func (f *FileService) UploadImage(ctx echo.Context) error {
@@ -57,7 +57,7 @@ func (f *FileService) UploadImage(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return echox.ToRes(ctx, fileName);
+	return echox.ToRes(ctx, "/file/image/" + fileName);
 }
 
 func (f *FileService) GetVideo(ctx echo.Context) error {

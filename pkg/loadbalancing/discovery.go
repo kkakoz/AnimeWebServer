@@ -36,7 +36,7 @@ func (s *ServiceDiscovery) Build(target resolver.Target, cc resolver.ClientConn,
 		return nil, err
 	}
 	for _, v := range res.Kvs {
-		log.Println("register address:", v.Value)
+		log.Println("register address:", string(v.Value))
 		s.SetServerAddress(string(v.Key), string(v.Value))
 	}
 	s.cc.NewAddress(s.getServices())

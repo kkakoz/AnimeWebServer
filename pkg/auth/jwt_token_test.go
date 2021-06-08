@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/spf13/viper"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -11,10 +12,9 @@ func TestJwtTokenGen(t *testing.T) {
 	//if err != nil {
 	//	t.Fatal("parse private err:", err)
 	//}
-	var id = "123456"
-	viper.SetDefault("jwt.publicKey", publicKey)
-	viper.SetDefault("jwt.pem", privateKey)
-	viper.SetDefault("jwt.issuer", "kkako")
+	var id int64 = 123456
+	viper.SetDefault("jwt.pemPath", "configs/privatekey")
+	viper.SetDefault("jwt.publicKeyPath", "configs/publickey")
 	//jwtTokenGen.nowFunc = func() time.Time {
 	//	return time.Unix(1516239022, 0)
 	//}
@@ -22,7 +22,7 @@ func TestJwtTokenGen(t *testing.T) {
 	if err != nil {
 		t.Fatal("new jwt token gen err:", err)
 	}
-	token, err := tokenGen.GenTokenExpire(id, time.Second * 10)
+	token, err := tokenGen.GenTokenExpire(strconv.FormatInt(id, 10), time.Second * 10)
 	if err != nil {
 		t.Error("gen token err:", err)
 	}
@@ -30,11 +30,11 @@ func TestJwtTokenGen(t *testing.T) {
 	if err != nil {
 		t.Fatal("new jwt token verifier err:", err)
 	}
-	sub, err := verifier.Verifier(token)
+	userId, err := verifier.Verifier(token)
 	if err != nil {
 		t.Fatal("verifier err:", err)
 	}
-	if sub != id {
+	if userId != strconv.FormatInt(id, 10) {
 		t.Fatal("token valid mistake")
 	}
 }

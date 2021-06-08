@@ -33,22 +33,32 @@ func (c *CountService) GetViewCount(ctx context.Context, req *countpb.AnimeIdsRe
 	for _, count := range counts {
 		viewCounts = append(viewCounts, &countpb.CountRes{
 			AnimeId: count.AnimeId,
-			Count: count.ViewCount,
+			Count:   int32(count.ViewCount),
 		})
 	}
 	return &countpb.ViewCountRes{
-		ViewCounts:           viewCounts,
+		ViewCounts: viewCounts,
 	}, nil
 }
 
-func (c *CountService) GetAnimeCount(ctx context.Context, req *countpb.AnimeIdReq) (*countpb.AnimeCountRes, error) {
-	panic("implement me")
+func (c *CountService) GetAnimeCount(ctx context.Context, req *countpb.AnimeCountReq) (*countpb.AnimeCountRes, error) {
+	collect, err := c.countUsecase.GetAnimeLikeCollect(ctx, req.UserId, req.AnimeId)
+	if err != nil {
+		return nil, err
+	}
+	return &countpb.AnimeCountRes{
+		AnimeId:      collect.AnimeId,
+		LikeCount:    int64(collect.LikeCount),
+		CollectCount: int64(collect.CollectCount),
+		Like:         collect.UserLiked,
+		Collect:      collect.UserCollected,
+	}, nil
 }
 
-func NewCountService(countUsecase domain.ICountUsecase, run kafkax.ConsumerRun) app.RegisterService {
-	//userService := &CountService{
-	//	countUsecase: countUsecase,
-	//}
+func NewCountService(countUsecase domain.ICountUsecase, run *kafkax.ConsumerRun) app.RegisterService {
+	countService := &CountService{
+		countUsecase: countUsecase,
+	}
 	return func(server *grpc.Server) {
 		db, err := mysqlx.GetDB(context.TODO())
 		if err != nil {
@@ -58,9 +68,9 @@ func NewCountService(countUsecase domain.ICountUsecase, run kafkax.ConsumerRun) 
 		if err != nil {
 			log.Fatal(err)
 		}
+		countpb.RegisterCountServiceServer(server, countService)
 		go run.Run()
 	}
 }
 
 var ServiceSet = wire.NewSet(NewCountService, usecase.NewCountUsecase, repo.NewCountRepo)
-

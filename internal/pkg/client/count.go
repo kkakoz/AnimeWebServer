@@ -14,9 +14,9 @@ func NewCountClient(ctx context.Context, etcdClient *clientv3.Client) (countpb.C
 	r := loadbalancing.NewServiceDiscovery(ctx, etcdClient)
 	resolver.Register(r)
 	conn, err := grpc.Dial(
-		r.Scheme()+":///"+loadbalancing.AnimeServName,
+		r.Scheme()+":///"+loadbalancing.CountServName,
 		grpc.WithBalancerName("round_robin"), grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(grpcx.NewClientErrInterceptor(loadbalancing.AnimeServName)),
+		grpc.WithUnaryInterceptor(grpcx.NewClientErrInterceptor(loadbalancing.CountServName)),
 	)
 	if err != nil {
 		return nil, err

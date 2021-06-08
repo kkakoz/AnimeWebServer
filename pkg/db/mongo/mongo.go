@@ -21,4 +21,4 @@ func NewMongoClient(viper *viper.Viper) (*qmgo.Client, error) {
 	return client, nil
 }
 
-var ProviderSet = wire.NewSet(NewMongoClient)
+var MongoSet = wire.NewSet(NewMongoClient)

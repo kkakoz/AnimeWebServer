@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"red-bean-anime-server/pkg/cache"
 	"time"
 )
 
@@ -24,7 +23,9 @@ func NewEtcd(viper *viper.Viper) (*clientv3.Client, error) {
 	config := clientv3.Config{
 		Endpoints: options.Endpoints,
 		DialTimeout: 5 * time.Second,
-		DialOptions: []grpc.DialOption{grpc.WithBlock()},
+		DialOptions: []grpc.DialOption{
+			grpc.WithBlock(),
+		},
 	}
 	client, err := clientv3.New(config)
 	if err != nil {
@@ -33,4 +34,4 @@ func NewEtcd(viper *viper.Viper) (*clientv3.Client, error) {
 	return client, nil
 }
 
-var EtcdSet = wire.NewSet(NewEtcd, cache.NewRedis)
+var EtcdSet = wire.NewSet(NewEtcd)

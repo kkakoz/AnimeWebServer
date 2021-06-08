@@ -24,3 +24,12 @@ func ToRes(ctx echo.Context, data interface{}) error {
 	err := ctx.JSON(http.StatusOK, res)
 	return err
 }
+
+func ToErr(ctx echo.Context, data interface{}) error {
+	res := &res{
+		Code: 500,
+		Data: data,
+	}
+	err := ctx.JSON(http.StatusOK, res)
+	return err
+}

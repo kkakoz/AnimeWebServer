@@ -11,7 +11,7 @@ func ParseFileType(filename string) string {
 	return ""
 }
 
-var fileTypes = []string{"jpg", "png", "gif"}
+var fileTypes = []string{"jpg", "png", "gif", "webp"}
 
 func IsImageFile(fileType string) bool {
 	lower := strings.ToLower(fileType)

@@ -9,7 +9,6 @@ import (
 	"red-bean-anime-server/pkg/cryption"
 	"red-bean-anime-server/pkg/gerrors"
 	"red-bean-anime-server/pkg/times"
-	"strconv"
 	"time"
 )
 
@@ -31,7 +30,7 @@ func (u *UserUsecase) Login(ctx context.Context, email, password string) (*domai
 		}
 		return nil, err
 	}
-	token, err := u.jwtTokenGen.GenTokenExpire(strconv.Itoa(int(user.ID)), time.Hour*24*3)
+	token, err := u.jwtTokenGen.GenTokenExpire(user.ID, user.Name, user.State, user.Auth, time.Hour*24*3)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +53,7 @@ func (u *UserUsecase) Register(ctx context.Context, email, name, password string
 		return gerrors.NewBusErr("该邮箱已经注册")
 	}
 	if !errors.Is(err, gorm.ErrRecordNotFound) { // 如果找到了用户
-		return err   // 其他err
+		return err // 其他err
 	}
 	salt := cryption.UUID()
 	user := &domain.User{
@@ -62,6 +61,8 @@ func (u *UserUsecase) Register(ctx context.Context, email, name, password string
 		Email:    email,
 		Password: cryption.Md5Str(password + salt),
 		Salt:     salt,
+		Auth:     domain.UserAuthNromal,
+		State:    domain.UserStateNormal,
 	}
 	err = u.userRepo.AddUser(ctx, user)
 	return err

@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	var configFile = flag.String("f", "configs/anime.yaml", "set config file which viper will loading.")
+	var configFile = flag.String("f", "configs/user.yaml", "set config file which viper will loading.")
 	flag.Parse()
 	ctx, cancel := context.WithCancel(context.Background())
 	sig := make(chan os.Signal, 1)

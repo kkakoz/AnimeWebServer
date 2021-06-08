@@ -2,12 +2,20 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/Shopify/sarama"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	countpb "red-bean-anime-server/api/count"
 	"red-bean-anime-server/internal/app/anime/domain"
+	"red-bean-anime-server/internal/pkg/msg"
 	"red-bean-anime-server/internal/pkg/query"
+	"red-bean-anime-server/pkg/auth"
 	"red-bean-anime-server/pkg/db/mysqlx"
+	"red-bean-anime-server/pkg/gerrors"
+	"red-bean-anime-server/pkg/grpcx"
+	"red-bean-anime-server/pkg/kafkax"
+	"strconv"
 )
 
 type AnimeUsecase struct {
@@ -15,9 +23,31 @@ type AnimeUsecase struct {
 	animeRepo    domain.IAnimeRepo
 	categoryRepo domain.ICategoryRepo
 	countCli     countpb.CountServiceClient
+	verifier     *auth.JwtTokenVerifier
+	kafkaCli     sarama.SyncProducer
 }
 
-func (a *AnimeUsecase) GetAnimeInfo(ctx, animeId int64, videoId int64) ([]domain.AnimeInfoRes, error) {
+func (a *AnimeUsecase) UserLikeAnime(ctx context.Context, animeId int64, likeType bool) error {
+	authorization := grpcx.GetAuthorization(ctx)
+	userIdStr, err := a.verifier.Verifier(authorization)
+	if err != nil {
+		return err
+	}
+	userId, err := strconv.ParseInt(userIdStr, 10, 64)
+	if err != nil {
+		return gerrors.ErrUnauthorized
+	}
+	countMsg := &msg.CountMsg{
+		MsgType: msg.MsgTypeLike,
+		UserId:  userId,
+		AnimeId: animeId,
+	}
+	countMsgData, err := json.Marshal(countMsg)
+	err = kafkax.SendSyncMsgByte(a.kafkaCli, msg.MsgTypeCountTopic, countMsgData)
+	return err
+}
+
+func (a *AnimeUsecase) GetAnimeInfo(ctx context.Context, animeId int64, videoId int64) ([]domain.AnimeInfoRes, error) {
 	panic("implement me")
 }
 
@@ -55,7 +85,7 @@ func (a *AnimeUsecase) AddAnime(ctx context.Context, addAnime *domain.AddAnime) 
 	return errors.Wrap(tx.Commit().Error, "添加动漫失败")
 }
 
-func (a *AnimeUsecase) AddVideo(ctx context.Context, addVideo *domain.AddVideo) error {
+func (a *AnimeUsecase) AddVideo(ctx context.Context, addVideo *domain.Video) error {
 	video := &domain.Video{
 		AnimeId: addVideo.AnimeId,
 		Episode: addVideo.Episode,
@@ -66,7 +96,7 @@ func (a *AnimeUsecase) AddVideo(ctx context.Context, addVideo *domain.AddVideo) 
 	return err
 }
 
-func NewAnimeUsecase(db *gorm.DB, animeRepo domain.IAnimeRepo,
-	categoryRepo domain.ICategoryRepo, countCli countpb.CountServiceClient) domain.IAnimeUsecase {
-	return &AnimeUsecase{db: db, animeRepo: animeRepo, categoryRepo: categoryRepo, countCli: countCli}
+func NewAnimeUsecase(db *gorm.DB, animeRepo domain.IAnimeRepo, categoryRepo domain.ICategoryRepo,
+	countCli countpb.CountServiceClient, produce sarama.SyncProducer, verifier *auth.JwtTokenVerifier) domain.IAnimeUsecase {
+	return &AnimeUsecase{db: db, animeRepo: animeRepo, categoryRepo: categoryRepo, countCli: countCli, kafkaCli: produce, verifier: verifier}
 }

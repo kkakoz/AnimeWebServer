@@ -20,7 +20,7 @@ func (a *AnimeRepo) GetAnimeListByCategoryId(ctx context.Context, page *query.Pa
 	if req.Sort == domain.SortByTime {
 		db = db.Order("order by animes.update_time desc")
 	}
-	err = db.Select("animes.*").Table("(select * from anime_categories where category_id = ?) as ac", req.CategoryId).
+	err = db.Select("animes.*").Table("(select * from categories where category_id = ? and deleted_at is null ) as ac", req.CategoryId).
 		Joins("left join animes on anime.id id = ac.anime_id").Find(&animes).Error
 	return animes, errors.Wrap(err, "查找分类下的动漫失败")
 }

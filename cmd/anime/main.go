@@ -21,7 +21,7 @@ func main() {
 	}()
 	app, err := NewApp(ctx, *configFile)
 	if err != nil {
-		log.Fatal("run new failed:", err)
+		log.Fatal("new app failed:", err)
 	}
 	err = app.Start()
 	if err != nil {

@@ -12,7 +12,7 @@ service CountService {
 
   rpc GetViewCount(AnimeIdsReq) returns(ViewCountRes) {}
 
-  rpc GetAnimeCount(AnimeIdReq) returns(AnimeCountRes) {}
+  rpc GetAnimeCount(AnimeCountReq) returns(AnimeCountRes) {}
 }
 
 message AnimeIdReq {
@@ -29,11 +29,18 @@ message ViewCountRes {
 
 message CountRes {
   int64 animeId = 1;
-  int64 count = 2;
+  int32 count = 2;
+}
+
+message AnimeCountReq {
+  int64 animeId = 1;
+  int64 userId = 2;
 }
 
 message AnimeCountRes {
   int64 animeId = 1;
   int64 likeCount = 2;
   int64 collectCount = 3;
+  bool like = 4;
+  bool collect = 5;
 }

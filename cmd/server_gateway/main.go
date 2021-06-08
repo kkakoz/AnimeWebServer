@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"os/signal"
@@ -11,9 +10,8 @@ import (
 )
 
 func main() {
-	var configFile = flag.String("f", "configs/anime.yaml", "set config file which viper will loading.")
+	var configFile = flag.String("f", "configs/gateway.yaml", "set config file which viper will loading.")
 	flag.Parse()
-	viper.AddConfigPath(*configFile)
 	ctx, cancel := context.WithCancel(context.Background())
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)

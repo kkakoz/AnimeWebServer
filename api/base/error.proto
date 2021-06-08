@@ -7,7 +7,8 @@ option go_package = "./;basepb";
 enum ErrorCode {
   EC_UNUSE = 0;
   EC_SUCCESS = 200; // 成功返回code
-  EC_BUSINESSERR = 400;  // 业务错误
+  EC_BUSINESSERR = 4000;  // 业务错误
+  EC_PARAMERR  = 400; // 参数错误
   EC_UNAUTHORIZED = 402; // 未登录或者需要重新登录
   EC_SERVER_UNKNOWN = 500; // 服务器未知错误
 

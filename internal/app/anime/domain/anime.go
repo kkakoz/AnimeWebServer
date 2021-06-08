@@ -10,29 +10,19 @@ type Video struct {
 	mysqlx.Model
 	AnimeId int64  `json:"anime_id"`
 	Episode int32  `json:"episode"`
-	Name    string `json:"name"`
-	Url     string `json:"url"`
-}
-
-type VideoInfo struct {
-}
-
-type AddVideo struct {
-	AnimeId int64  `json:"anime_id"`
-	Episode int32  `json:"episode"`
-	Name    string `json:"name"`
-	Url     string `json:"url"`
+	Name    string `json:"name" gorm:"size:20;"`
+	Url     string `json:"url" gorm:"size:255;"`
 }
 
 type Anime struct {
 	mysqlx.Model
-	Name          string `json:"name"`
-	Description   string `json:"description"`
+	Name          string `json:"name" gorm:"size:20;"`
+	Description   string `json:"description" gorm:"size:255;"`
 	Year          int32  `json:"year"`
-	ImageUrl      string `json:"image_url"`
+	ImageUrl      string `json:"image_url" gorm:"size:255;"`
 	Episode       int32  `json:"episode"`
 	Quarter       int32  `json:"quarter"`
-	FirstPlayTime string `json:"first_play_time"`
+	FirstPlayTime string `json:"first_play_time" gorm:"size:50;"`
 }
 
 type AnimeInfoRes struct {
@@ -68,9 +58,10 @@ const (
 
 type IAnimeUsecase interface {
 	AddAnime(ctx context.Context, req *AddAnime) error
-	AddVideo(ctx context.Context, video *AddVideo) error
+	AddVideo(ctx context.Context, video *Video) error
 	GetAnimeList(ctx context.Context, page *query.Page, req *AnimeListReq) ([]Anime, error)
-	GetAnimeInfo(ctx, animeId int64, videoId int64) ([]AnimeInfoRes, error)
+	GetAnimeInfo(ctx context.Context, animeId int64, videoId int64) ([]AnimeInfoRes, error)
+	UserLikeAnime(ctx context.Context, animeId int64, likeType bool) error
 }
 
 type IAnimeRepo interface {

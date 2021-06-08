@@ -12,7 +12,6 @@ import (
 
 type consumerOptions struct {
 	Address []string
-	Topic   []string
 	GroupId string
 }
 
@@ -25,7 +24,9 @@ type ConsumerRun struct {
 
 type ConsumerRunFunc func(*sarama.ConsumerMessage) error
 
-func NewConsumer(ctx context.Context, viper *viper.Viper, logger *zap.Logger, runFunc ConsumerRunFunc) (*ConsumerRun, error) {
+type GetTopic func() []string
+
+func NewConsumer(ctx context.Context, viper *viper.Viper, logger *zap.Logger, runFunc ConsumerRunFunc, getTopic GetTopic) (*ConsumerRun, error) {
 	o := &consumerOptions{}
 	viper.SetDefault("kafka.address", []string{"127.0.0.1:9092"})
 	err := viper.UnmarshalKey("kafka", o)
@@ -36,8 +37,9 @@ func NewConsumer(ctx context.Context, viper *viper.Viper, logger *zap.Logger, ru
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = true
+	topic := getTopic()
 
-	consumer, err := cluster.NewConsumer(o.Address, o.GroupId, o.Topic, config)
+	consumer, err := cluster.NewConsumer(o.Address, o.GroupId, topic, config)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +67,6 @@ func (c *ConsumerRun) Run() {
 				err := c.runFunc(msg)
 				if err != nil {
 					c.logger.Error(fmt.Sprintf("consumer msg err: %+v\n", err), zap.String("msg", fmt.Sprintf("%+v", msg)))
-
 				}
 				c.consumer.MarkOffset(msg, "") // mark message as processed
 			}
