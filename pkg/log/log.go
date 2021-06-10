@@ -20,6 +20,7 @@ type Options struct {
 }
 
 var logger *zap.Logger
+var sugarLogger *zap.SugaredLogger
 
 func L() *zap.Logger {
 	return logger
@@ -28,13 +29,13 @@ func L() *zap.Logger {
 func NewLog(viper *viper.Viper) (*zap.Logger, error) {
 	var (
 		err    error
-		level  = zap.NewAtomicLevel()
 		o = &Options{}
 	)
 	viper.SetDefault("log.filename", "temp/temp.log")
 	viper.SetDefault("log.maxSize", 10)
 	viper.SetDefault("log.maxBackups", 5)
 	viper.SetDefault("log.maxAge", 30)
+	viper.SetDefault("log.stdout", true)
 	err = viper.UnmarshalKey("log", o)
 	if err != nil {
 		return logger, errors.Wrap(err, "viper unmarshal失败")
@@ -47,24 +48,30 @@ func NewLog(viper *viper.Viper) (*zap.Logger, error) {
 		MaxAge:     o.MaxAge, // 保留旧文件最长天数
 	})
 
-	// file core 采用jsonEncoder
-	cores := make([]zapcore.Core, 0, 2)
-	je := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
-	cores = append(cores, zapcore.NewCore(je, fw, level))
+	encoder := getEncoder()
 
+	var core zapcore.Core
 	if o.Stdout {
-		cw := zapcore.Lock(os.Stdout)
-		ce := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
-		cores = append(cores, zapcore.NewCore(ce, cw, level))
+		consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+		core = zapcore.NewTee(
+			zapcore.NewCore(encoder, fw, zapcore.DebugLevel),
+			zapcore.NewCore(consoleEncoder, os.Stdout, zapcore.DebugLevel),
+		)
+	} else {
+		core = zapcore.NewCore(encoder, fw, zapcore.InfoLevel)
 	}
-
-	core := zapcore.NewTee(cores...)
 	logger = zap.New(core)
+	sugarLogger = logger.Sugar()
 
 	zap.ReplaceGlobals(logger)
-
-
 	return logger, nil
+}
+
+func getEncoder() zapcore.Encoder {
+	config := zap.NewProductionEncoderConfig()
+	config.EncodeTime = zapcore.ISO8601TimeEncoder
+	config.EncodeLevel = zapcore.CapitalLevelEncoder
+	return zapcore.NewJSONEncoder(config)
 }
 
 var LogSet = wire.NewSet(NewLog)

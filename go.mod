@@ -26,6 +26,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.23.0 // indirect
 	github.com/qiniu/qmgo v0.9.4
+	github.com/robfig/cron v1.2.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/viper v1.7.1
 	github.com/valyala/fasttemplate v1.2.1 // indirect

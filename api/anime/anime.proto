@@ -63,7 +63,7 @@ service AnimeService {
 }
 
 message AddCategoryReq {
-  string name = 1;
+  string name = 1 [(validate.rules).string.min_len = 1];
 }
 
 message CategoryListRes {
@@ -79,7 +79,7 @@ message Category {
 message AddAnimeReq {
   string name = 1 [(validate.rules).string.min_len = 1];
   string description = 2 [(validate.rules).string.min_len = 1];
-  int32 year = 3 [(validate.rules).int32.lt = 1900];
+  int32 year = 3 [(validate.rules).int32.gt = 1900];
   int32 quarter = 4 [(validate.rules).int32 = {gt: 0, lt: 12}];
   string firstPlayTime = 5;
   repeated int64 categoryId = 6 [(validate.rules).repeated.min_items = 1];
@@ -88,7 +88,7 @@ message AddAnimeReq {
 message AddVideoReq {
   int64 animeId = 1 [(validate.rules).int64.gt = 0];
   int32 episode = 2 [(validate.rules).int32.gt = 0];
-  string name = 3 [(validate.rules).string.min_len = 1];
+  string name = 3 ;
   string url = 4 [(validate.rules).string.min_len = 1];
 }
 
@@ -113,21 +113,22 @@ message AnimeRes {
 }
 
 message AnimeInfoReq {
-  int64 id = 1 [(validate.rules).int64.gt = 0];
+  int64 animeId = 1 [(validate.rules).int64.gt = 0];
 }
 
 message AnimeInfoRes {
   int64 id = 1;
   string name = 2;
   string description = 3;
-  string imageUrl = 4;
-  int32 year = 5;
-  int32 quarter = 6;
-  int64 hits = 7;
-  int32 likeCount = 8;
-  int32 viewCount = 9;
-  int32 collectCount = 10;
-  repeated VideoInfo videoInfos = 11;
+  int32 year = 4;
+  int32 quarter = 5;
+  string firstPlayTime = 6;
+  int32 likeCount = 7;
+  int32 collectCount = 8;
+  string updatedAt = 9;
+  bool like = 10;
+  bool collect = 11;
+  repeated VideoInfo videoInfos = 12;
 }
 
 message VideoInfo {

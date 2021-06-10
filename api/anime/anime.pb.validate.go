@@ -44,7 +44,12 @@ func (m *AddCategoryReq) Validate() error {
 		return nil
 	}
 
-	// no validation rules for Name
+	if utf8.RuneCountInString(m.GetName()) < 1 {
+		return AddCategoryReqValidationError{
+			field:  "Name",
+			reason: "value length must be at least 1 runes",
+		}
+	}
 
 	return nil
 }
@@ -275,10 +280,10 @@ func (m *AddAnimeReq) Validate() error {
 		}
 	}
 
-	if m.GetYear() >= 1900 {
+	if m.GetYear() <= 1900 {
 		return AddAnimeReqValidationError{
 			field:  "Year",
-			reason: "value must be less than 1900",
+			reason: "value must be greater than 1900",
 		}
 	}
 
@@ -377,12 +382,7 @@ func (m *AddVideoReq) Validate() error {
 		}
 	}
 
-	if utf8.RuneCountInString(m.GetName()) < 1 {
-		return AddVideoReqValidationError{
-			field:  "Name",
-			reason: "value length must be at least 1 runes",
-		}
-	}
+	// no validation rules for Name
 
 	if utf8.RuneCountInString(m.GetUrl()) < 1 {
 		return AddVideoReqValidationError{
@@ -705,9 +705,9 @@ func (m *AnimeInfoReq) Validate() error {
 		return nil
 	}
 
-	if m.GetId() <= 0 {
+	if m.GetAnimeId() <= 0 {
 		return AnimeInfoReqValidationError{
-			field:  "Id",
+			field:  "AnimeId",
 			reason: "value must be greater than 0",
 		}
 	}
@@ -783,19 +783,21 @@ func (m *AnimeInfoRes) Validate() error {
 
 	// no validation rules for Description
 
-	// no validation rules for ImageUrl
-
 	// no validation rules for Year
 
 	// no validation rules for Quarter
 
-	// no validation rules for Hits
+	// no validation rules for FirstPlayTime
 
 	// no validation rules for LikeCount
 
-	// no validation rules for ViewCount
-
 	// no validation rules for CollectCount
+
+	// no validation rules for UpdatedAt
+
+	// no validation rules for Like
+
+	// no validation rules for Collect
 
 	for idx, item := range m.GetVideoInfos() {
 		_, _ = idx, item

@@ -36,25 +36,25 @@ func NewJwtTokenVerifier(viper *viper.Viper) (*JwtTokenVerifier, error) {
 	return &JwtTokenVerifier{publicKey: pem}, nil
 }
 
-func (v *JwtTokenVerifier) Verifier(token string) (string, error) {
-	t, err := jwt.ParseWithClaims(token, &jwt.StandardClaims{},
+func (v *JwtTokenVerifier) Verifier(token string) (*UserClaims, error) {
+	t, err := jwt.ParseWithClaims(token, &UserClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return v.publicKey, nil
 		})
 	if err != nil {
-		return "", err
+		return nil, gerrors.ErrUnauthorized
 	}
 	if !t.Valid {
-		return "", gerrors.ErrUnauthorized
+		return nil, gerrors.ErrUnauthorized
 	}
-	clm, ok := t.Claims.(*jwt.StandardClaims)
+	clm, ok := t.Claims.(*UserClaims)
 	if !ok {
-		return "", gerrors.ErrUnauthorized
+		return nil, gerrors.ErrUnauthorized
 	}
 
 	if err = clm.Valid(); err != nil {
-		return "", gerrors.ErrUnauthorized
+		return nil, gerrors.ErrUnauthorized
 	}
 
-	return clm.Subject, nil
+	return clm, nil
 }

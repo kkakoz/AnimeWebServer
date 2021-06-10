@@ -8,6 +8,7 @@ import (
 	"log"
 	"red-bean-anime-server/api/count"
 	"red-bean-anime-server/internal/app/count/domain"
+	"red-bean-anime-server/internal/app/count/pkg/runnner"
 	"red-bean-anime-server/internal/app/count/repo"
 	"red-bean-anime-server/internal/app/count/usecase"
 	"red-bean-anime-server/pkg/app"
@@ -70,6 +71,7 @@ func NewCountService(countUsecase domain.ICountUsecase, run *kafkax.ConsumerRun)
 		}
 		countpb.RegisterCountServiceServer(server, countService)
 		go run.Run()
+		runnner.SyncCache(countUsecase)
 	}
 }
 

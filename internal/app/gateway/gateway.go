@@ -54,7 +54,7 @@ func (g *Gateway) Start() error {
 
 func NewHandleErr(logger *zap.Logger) runtime.ProtoErrorHandlerFunc {
 	return func(ctx context.Context, mux *runtime.ServeMux, marshaler runtime.Marshaler, writer http.ResponseWriter, request *http.Request, err error) {
-		log.Println("http = ", request.RequestURI)
+		log.Println("http url = ", request.RequestURI)
 		if err == gerrors.InterruptErr {
 			return
 		}

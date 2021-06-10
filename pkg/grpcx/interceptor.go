@@ -6,7 +6,6 @@ import (
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"red-bean-anime-server/pkg/gerrors"
 )
 
@@ -47,7 +46,10 @@ func NewValidateInterceptor() grpc.UnaryServerInterceptor {
 
 func RecoveryInterceptor() grpc_recovery.Option {
 	return grpc_recovery.WithRecoveryHandler(func(p interface{}) (err error) {
-		err = errors.New(fmt.Sprintf("%v", p))
-		return grpc.Errorf(codes.Unknown, fmt.Sprintf("%+v", err))
+		err, ok := p.(error)
+		if ok {
+			return errors.New(err.Error())
+		}
+		return errors.New(fmt.Sprintf("%+v", p))
 	})
 }

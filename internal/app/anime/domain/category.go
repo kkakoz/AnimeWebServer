@@ -7,7 +7,7 @@ import (
 
 type Category struct {
 	mysqlx.Model
-	Name string `json:"name"`
+	Name string `json:"name" gorm:"size:20"`
 }
 
 type AnimeCategory struct {

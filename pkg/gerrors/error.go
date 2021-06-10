@@ -6,6 +6,7 @@ import (
 	spb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"red-bean-anime-server/pkg/log"
 )
 
 const TypeUrlStack = "type_url_stack"
@@ -14,6 +15,7 @@ func WrapError(err error) error {
 	if err == nil {
 		return nil
 	}
+	log.L().Error(fmt.Sprintf("%+v", err))
 	statusErr, ok := status.FromError(err)
 	if ok {
 		return statusErr.Err()
@@ -28,6 +30,7 @@ func WrapError(err error) error {
 			},
 		},
 	}
+
 	return status.FromProto(spbErr).Err()
 }
 

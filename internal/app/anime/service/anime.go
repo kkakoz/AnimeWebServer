@@ -2,14 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/google/wire"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	"red-bean-anime-server/api/anime"
 	"red-bean-anime-server/internal/app/anime/domain"
-	"red-bean-anime-server/internal/app/anime/repo"
-	"red-bean-anime-server/internal/app/anime/usecase"
 	"red-bean-anime-server/internal/pkg/query"
 	"red-bean-anime-server/pkg/app"
 	"red-bean-anime-server/pkg/db/mysqlx"
@@ -26,7 +23,8 @@ func (a *AnimeService) AnimeLike(ctx context.Context, req *animepb.AnimeLikeReq)
 }
 
 func (a *AnimeService) AnimeUnLike(ctx context.Context, req *animepb.AnimeLikeReq) (*emptypb.Empty, error) {
-	panic("implement me")
+	err := a.animeUsecase.UserUnLikeAnime(ctx, req.AnimeId, req.LikeType)
+	return &emptypb.Empty{}, err
 }
 
 func (a *AnimeService) GetAnimeList(ctx context.Context, req *animepb.GetAnimeListReq) (*animepb.AnimeListRes, error) {
@@ -60,7 +58,32 @@ func (a *AnimeService) GetAnimeList(ctx context.Context, req *animepb.GetAnimeLi
 }
 
 func (a *AnimeService) GetAnimeInfo(ctx context.Context, req *animepb.AnimeInfoReq) (*animepb.AnimeInfoRes, error) {
-	panic("not implement")
+	info, err := a.animeUsecase.GetAnimeInfo(ctx, req.AnimeId)
+	if err != nil {
+		return nil, err
+	}
+	videos := make([]*animepb.VideoInfo, 0)
+	for _, v := range info.Videos {
+		videos = append(videos, &animepb.VideoInfo{
+			Id:      v.ID,
+			Episode: v.Episode,
+			Name:    v.Name,
+			Url:     v.Url,
+		})
+	}
+	res := &animepb.AnimeInfoRes{
+		Id:                   info.ID,
+		Name:                 info.Name,
+		Description:          info.Description,
+		Year:                 info.Year,
+		Quarter:              info.Quarter,
+		LikeCount:            info.LikeCount,
+		CollectCount:         info.CollectCount,
+		VideoInfos:           videos,
+		Like:                 info.Like,
+		Collect:              info.Collect,
+	}
+	return res, nil
 }
 
 func (a *AnimeService) AddAnime(ctx context.Context, req *animepb.AddAnimeReq) (*emptypb.Empty, error) {
@@ -77,8 +100,6 @@ func (a *AnimeService) AddAnime(ctx context.Context, req *animepb.AddAnimeReq) (
 }
 
 func (a *AnimeService) AddCategory(ctx context.Context, req *animepb.AddCategoryReq) (*emptypb.Empty, error) {
-	log.Println("...")
-	req.Validate()
 	err := a.categoryUsecase.AddCategory(ctx, req.Name)
 	return &emptypb.Empty{}, err
 }
@@ -128,6 +149,3 @@ func NewAnimeService(categoryUsecase domain.ICategoryUsecase, animeUsecase domai
 		animepb.RegisterAnimeServiceServer(server, animeService)
 	}
 }
-
-var ProviderSet = wire.NewSet(NewAnimeService, usecase.NewCategoryUsecase,
-	repo.NewCategoryRepo, usecase.NewAnimeUsecase, repo.NewAnimeRepo)

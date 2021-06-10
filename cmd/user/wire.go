@@ -5,9 +5,10 @@ package main
 import (
 	"context"
 	"github.com/google/wire"
-	"red-bean-anime-server/internal/app/user/service"
+	"red-bean-anime-server/internal/app/user"
 	"red-bean-anime-server/pkg/app"
 	"red-bean-anime-server/pkg/auth"
+	"red-bean-anime-server/pkg/cache"
 	"red-bean-anime-server/pkg/config"
 	"red-bean-anime-server/pkg/db/etcd"
 	"red-bean-anime-server/pkg/db/mysqlx"
@@ -19,7 +20,8 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 		config.ConfigSet,
 		app.AppSet,
 		etcd.EtcdSet,
-		service.ServiceSet,
+		cache.RedisSet,
+		user.UserSet,
 		log.LogSet,
 		mysqlx.MysqlSet,
 		auth.AuthSet,

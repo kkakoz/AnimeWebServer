@@ -27,6 +27,7 @@ type ServiceRegister struct {
 
 const leaseTime int64 = 20
 
+// 注册到etcd
 func NewServiceRegister(ctx context.Context, cli *clientv3.Client, serName, addr string) (*ServiceRegister, error) {
 	s := &ServiceRegister{
 		ctx:       ctx,

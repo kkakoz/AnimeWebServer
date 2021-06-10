@@ -2,14 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/google/wire"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"log"
 	userpb "red-bean-anime-server/api/user"
 	"red-bean-anime-server/internal/app/user/domain"
-	"red-bean-anime-server/internal/app/user/repo"
-	"red-bean-anime-server/internal/app/user/usecase"
 	"red-bean-anime-server/pkg/app"
 	"red-bean-anime-server/pkg/db/mysqlx"
 	"red-bean-anime-server/pkg/gerrors"
@@ -67,4 +64,3 @@ func NewUserService(userUsercase domain.IUserUsecase) app.RegisterService {
 	}
 }
 
-var ServiceSet = wire.NewSet(NewUserService, usecase.NewUserUsecase, repo.NewUserRepo)

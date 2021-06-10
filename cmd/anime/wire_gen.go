@@ -54,7 +54,8 @@ func NewApp(ctx context.Context, confpath string) (*app.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	iAnimeUsecase := usecase.NewAnimeUsecase(db, iAnimeRepo, iCategoryRepo, countServiceClient, syncProducer, jwtTokenVerifier)
+	iVideoRepo := repo.NewVideoRepo()
+	iAnimeUsecase := usecase.NewAnimeUsecase(db, iAnimeRepo, iCategoryRepo, countServiceClient, syncProducer, jwtTokenVerifier, iVideoRepo)
 	registerService := service.NewAnimeService(iCategoryUsecase, iAnimeUsecase)
 	grpcServer := app.NewGrpcServer(ctx, clientv3Client, registerService)
 	appApp, err := app.NewApp(viper, logger, grpcServer)
